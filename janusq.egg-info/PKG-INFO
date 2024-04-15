@@ -1,0 +1,31 @@
+Metadata-Version: 2.1
+Name: janusq
+Version: 0.1.0
+Summary: janusq: a full-stack framework.
+Home-page: 
+Author: ZJU-CCNT
+Author-email: 
+License: MIT
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: qiskit==0.46.0
+Requires-Dist: qiskit-terra==0.46.0
+Requires-Dist: qiskit-aer==0.13.3
+Requires-Dist: qiskit-ignis
+Requires-Dist: ray==2.9.2
+Requires-Dist: scikit-learn==1.4.0
+Requires-Dist: seaborn
+Requires-Dist: PennyLane==0.34.0
+Requires-Dist: jax==0.4.24
+Requires-Dist: jaxlib==0.4.24
+Requires-Dist: tqdm
+Requires-Dist: cloudpickle
+Requires-Dist: optax
+Requires-Dist: matplotlib
+Requires-Dist: pgmpy
+Requires-Dist: bqskit
+Requires-Dist: jupyter
+Requires-Dist: dwave-system
+Requires-Dist: python-sat
+Requires-Dist: dwave-neal
+Requires-Dist: sympy
