@@ -146,7 +146,7 @@ class FidelityModel():
                 break
 
             if verbose and epoch %100 == 0:
-                # jax.clear_backends()
+                jax.clear_backends()
                 logging.info(
                     f'epoch: {epoch}, \t epoch loss = {sum(batch_losses)}, \t validation loss = {valid_loss}')
 

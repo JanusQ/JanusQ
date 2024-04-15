@@ -1,6 +1,6 @@
 
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARN)
 import sys
 sys.path.append('/home/JanusQ-main/')
 
