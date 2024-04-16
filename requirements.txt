@@ -13,6 +13,7 @@ cloudpickle
 # retry
 optax
 matplotlib
+torch-2.2.2+cpu
 pgmpy
 bqskit
 jupyter

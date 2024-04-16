@@ -229,8 +229,8 @@ class FidelityModel():
         if save_path is not None:
             plt.savefig(save_path)
 
-        if plot:
-            plt.show()
+        # if plot:
+        #     plt.show()
 
         return fig
 
