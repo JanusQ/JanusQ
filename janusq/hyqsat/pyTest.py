@@ -30,14 +30,14 @@ def match_result(res, cur):
         res["conflict literals"] = int(re.findall(r'[0-9]+', cur)[0])
     elif cur.startswith("actual CPU time"):
         res["actual CPU time"] = float(re.findall(r'[0-9]+\.*[0-9]*', cur)[0])
-    elif cur.startswith("this problem time"):
-        res["this problem time"] = float(re.findall(r'[0-9]+\.*[0-9]*', cur)[0])   
+    elif cur.startswith("solving time"):
+        res["solving time"] = float(re.findall(r'[0-9]+\.*[0-9]*', cur)[0])   
     elif cur.startswith("annealing time"):
         res["annealing time"] = float(re.findall(r'[0-9]+\.*[0-9]*', cur)[0])     
     elif cur.startswith("quantum count"):
         res["quantum count"] = int(re.findall(r'[0-9]+', cur)[0])  
-    elif cur.startswith("simulate time"):
-        res["simulate time"] = float(re.findall(r'[0-9]+\.*[0-9]*', cur)[0])   
+    elif cur.startswith("simulation time"):
+        res["simulation time"] = float(re.findall(r'[0-9]+\.*[0-9]*', cur)[0])   
     elif cur.startswith("quantum success number"):
         res["quantum success number"] = int(re.findall(r'[0-9]+', cur)[0])
     elif cur.startswith("quantum conflict number"):
