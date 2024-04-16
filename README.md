@@ -11,15 +11,23 @@ pip install janusq.whl
 git clone git@github.com:JanusQ/JanusQ.git
 cd JanusQ
 pip install -r requirements.txt
+# or you can pull docker image from docker hub.
+docker pull jxhhhh:janusq:latest
 ```
 <!-- File Download:[Linux Janusq.](https://github.com/JanusQ/JanusQ/blob/main/dist/janusq-0.1.0-py3-none-any.whl) -->
 
 ## Structure of the Framework
-- JanusQ
-  - analysis: Circuit analysis.
-  - optimizations: Circuit optimizations and readout optimizations.
-  - data_objects: Generate random or algorithm circuit.
-  - hyqsat: Solve 3-SAT problems.
+- JanusCT
+  - vectorization
+  - fidelity preidiction
+  - fidelity optimization
+  - unitary decomposition
+  - bug identification
+- JanusFEM
+  - readout calibration
+- HyQSAT
+  - solve sat domain problem
+- time crystal
 
 
 ## Related papers
@@ -37,3 +45,7 @@ Siwei Tan, Congliang Lang, Liang Xiang; Shudi Wang, Xinghui Jia, Ziqi Tan, Tingt
 
 **[Nature 2022] Digital Quantum Simulation of Floquet Symmetry Protected Topological Phases**  
 Xu Zhang (Zhejiang University), Wenjie Jiang (Tsinghua University), Jinfeng Deng, Ke Wang, Jiachen Chen, Pengfei Zhang, Wenhui Ren, Hang Dong, Shibo Xu, Yu Gao, Feitong Jin, Xuhao Zhu, Qiujiang Guo, Hekang Li, Chao Song, Alexey V. Gorshkov, Thomas Iadecola, Fangli Liu, Zhe-Xuan Gong, Zhen Wang* (Zhejiang University), Dong-Ling Deng* (Tsinghua University) & Haohua Wang (Zhejiang University)
+
+# Note
+1. Permission denied 'minisat_core'  
+chmod +x janusq/hyqsat/minisat_core
