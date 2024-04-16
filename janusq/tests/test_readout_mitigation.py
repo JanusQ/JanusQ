@@ -9,7 +9,7 @@ from simulator.readout_error_model import ReadoutErrorModel
 from optimizations.readout_mitigation.fem import Mitigator
 from optimizations.readout_mitigation.fem import IterativeSamplingProtocol, EnumeratedProtocol
 import numpy as np
-from data_objects.algorithms import get_algs, ibu_response_matrix
+from data_objects.algorithms import get_algorithm_circuits, ibu_response_matrix
 from qiskit.quantum_info.analysis import hellinger_fidelity
 from optimizations.readout_mitigation.fem.tools import npformat_to_statuscnt,statuscnt_to_npformat
 
@@ -19,7 +19,7 @@ backend = LinearBackend(n_qubits, 1)
 simulator = NoisySimulator(
     backend, readout_error_model=ReadoutErrorModel.random_model(backend))
 
-circuit = get_algs(n_qubits, backend, algs = ['ghz'])[0]
+circuit = get_algorithm_circuits(n_qubits, backend, algs = ['ghz'])[0]
 output_noise = simulator.execute(circuit,samples)
 outout_ideal = {'1'*n_qubits:samples*0.5,'0'*n_qubits:samples*0.5}
 

@@ -146,7 +146,7 @@ def construct_bayesian_network(bench_results, n_qubits, groups, multi_process=Tr
     return model, infer
 
 
-def correlation_based_partation(bench_results, group_size, n_qubits):
+def correlation_based_partation(bench_results, group_size, n_qubits, draw_grouping = False):
     error_count = np.zeros(shape=(n_qubits, 3, n_qubits, 1))
     all_count = np.zeros(shape=(n_qubits, 3, n_qubits, 1))
 
@@ -176,29 +176,15 @@ def correlation_based_partation(bench_results, group_size, n_qubits):
         if q1 == q2:
             continue
         graph.add_edge(q1, q2, freq_diff=np.round(freq_diff[q1][q2][0], 4))
-        
-    # graph.add_nodes_from(range(n_qubits))
-    # for qubit in range(n_qubits):
-    #     graph.nodes[qubit]['qubit'] = qubit
-
-    # # 添加边并设置 'freq_diff' 属性
-    # for q1, q2, _ in zip(*large_corr_qubit_pairs):
-    #     if q1 == q2:
-    #         continue
-    #     graph.add_edge(q1, q2)
-    #     graph[q1][q2]['freq_diff'] = np.round(freq_diff[q1][q2][0], 4)
-    # plt.figure(figsize=(10, 10))
-    if n_qubits < 10:
+    
+    if n_qubits < 10 and draw_grouping:
         plt.clf()
-        plt.figure(figsize=(14, 6))
+        plt.figure(figsize=(7, 3))
         plt.subplot(1, 2, 1)
         nx.draw(graph, with_labels=True, font_weight='bold')
         labels = nx.get_edge_attributes(graph, 'freq_diff')
         nx.draw_networkx_edge_labels(graph, pos=nx.spring_layout(graph), edge_labels=labels)
-
-    # 显示图形
-    # plt.show()
-    # plt.show()
+        plt.show()
 
     def partition(group):
         small_partitions = []
@@ -510,15 +496,11 @@ class Mitigator():
         opt_statuscnts = map(mitigate, list(
             zip(reals, statuscnts)), multi_process=multi_process)
 
-        # before_score = self.eval_statuscnt(bench_results)
         opt_score = self.eval_statuscnt((reals, opt_statuscnts))
-
-        # TODO: 4.208632231404959 3.9592835303778458, 降的有些少，奇怪
-        # print(before_score, opt_score)
 
         return iter, opt_score, (reals, opt_statuscnts)
 
-    def init(self, bench_results, group_size=2, partation_methods=['random', 'max-cut'], threshold=1e-5, multi_process=True):
+    def init(self, bench_results, group_size=2, partation_methods=['random', 'max-cut'], multi_process=True, draw_grouping = False):
         
         real_bstrs, statuscnts = bench_results
         if isinstance(statuscnts[0], dict):
@@ -535,14 +517,12 @@ class Mitigator():
             candidate_groups = []
             if 'random' in partation_methods:
                 for _ in range(1):
-                    '''目前看来好的划分是会对校准结果产生影响的'''
                     groups = self.random_group(group_size)
                     candidate_groups.append(groups)
 
-            '''一般都比较好，但是和最优相比可能还是差了'''
             if 'max-cut' in partation_methods:
                 groups = correlation_based_partation(
-                    bench_results, group_size, n_qubits)
+                    bench_results, group_size, n_qubits, draw_grouping = draw_grouping)
                 candidate_groups.append(groups)
 
 

@@ -51,7 +51,7 @@ def get_data(id, qiskit_circuit: QuantumCircuit, mirror, backend: Backend, shoul
         return circuit
 
 
-def get_algs(n_qubits, backend: Backend, algs = ['qft', 'hs', 'ising', 'qknn', 'qsvm', 'vqc', 'ghz', 'grover'], unitary = False) -> list[Circuit]:
+def get_algorithm_circuits(n_qubits, backend: Backend, algs = ['qft', 'hs', 'ising', 'qknn', 'qsvm', 'vqc', 'ghz', 'grover'], unitary = False) -> list[Circuit]:
     circuits = []
     mirror = False
 

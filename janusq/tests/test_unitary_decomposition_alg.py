@@ -8,7 +8,7 @@ from pathlib import Path
 sys.path.append(str(Path(os.getcwd())))
 
 from data_objects.circuit import qiskit_to_circuit
-from data_objects.algorithms import get_algs, qft, ghz
+from data_objects.algorithms import get_algorithm_circuits, qft, ghz
 from data_objects.backend import FullyConnectedBackend, LinearBackend
 import math
 import numpy as np
@@ -31,7 +31,7 @@ n_qubits = 5
 alg_backend = FullyConnectedBackend(n_qubits=n_qubits, basis_single_gates=[
                                 'u'], basis_two_gates=['cz'])
 
-circuit = get_algs(n_qubits, alg_backend, algs = ['qft'])[0]
+circuit = get_algorithm_circuits(n_qubits, alg_backend, algs = ['qft'])[0]
 
 backend = FullyConnectedBackend(n_qubits=n_qubits, basis_single_gates=[
                                 'u'], basis_two_gates=['crz'])

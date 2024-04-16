@@ -54,7 +54,6 @@ def match_result(res, cur):
         res["isSat"] = False
 
 def solveByMinisat(cnf_file, result_dir="", verb=1, cpuLim=0, memLim=0, strictp=False):
-    # 异步执行CMD命令
     if verb:
         verb = 1
     else:
@@ -62,7 +61,6 @@ def solveByMinisat(cnf_file, result_dir="", verb=1, cpuLim=0, memLim=0, strictp=
     res = {}
     process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), os.path.join(current_dir, cnf_file), result_dir, str(verb), str(cpuLim),  str(memLim), str(strictp), "minisat", "null"], stdout=subprocess.PIPE, text=True)
     
-    # 读取命令输出
     while True:
         output = process.stdout.readline()
         if output == '' and process.poll() is not None:
@@ -73,14 +71,12 @@ def solveByMinisat(cnf_file, result_dir="", verb=1, cpuLim=0, memLim=0, strictp=
             logging.info(cur)
     return res
 def solveByHyqsat(cnf_file, result_dir="1",verb=True, cpuLim=0, memLim=0, strictp=False):
-    # 异步执行CMD命令
     if verb:
         verb = 1
     else:
         verb = 0
     process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), os.path.join(current_dir, cnf_file), result_dir, str(verb), str(cpuLim),  str(memLim), str(strictp), "quantum", os.path.join(os.path.dirname(inspect.getfile(recongnize)), 'python/')], stdout=subprocess.PIPE, text=True)
     res = {}
-    # 读取命令输出
     while True:
         output = process.stdout.readline()
         if output == '' and process.poll() is not None:
@@ -91,9 +87,3 @@ def solveByHyqsat(cnf_file, result_dir="1",verb=True, cpuLim=0, memLim=0, strict
             logging.info(cur)
     return res
 
-# logging.info(os.path.dirname(__file__))
-# logging.info(inspect.getfile(recongnize))
-# logging.info(os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'))
-# logging.info(os.path.join(os.path.dirname(inspect.getfile(recongnize)), 'python/'))
-# solveByHyqsat('examples/UF50-218-1000/uf50-01.cnf')
-# print(re.findall(r'[0-9]+', "sdfzsd123"))

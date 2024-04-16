@@ -104,28 +104,30 @@ def run_rb(simulator: NoisySimulator, rb_pattern, rb_circs, xdata, target_qubits
 
 
         transpiled_circs_list.append(fit_rb_circ)
-        
-        '''TODO: 看下很多比特的时候的时间'''
+
         qasm_simulator = Aer.get_backend('qasm_simulator')
         job = execute(error_rb_circ, qasm_simulator, noise_model =simulator.get_noise_model(target_qubits) , basis_gates=basis_gates, shots= shots, optimization_level=0)
         jobs.append(job)
 
 
-        # Add data to the fitter
-    rb_fit.add_data([job.result() for job in jobs])
+    # Add data to the fitter
+    try:
+        rb_fit.add_data([job.result() for job in jobs])
 
+        gpc = rb.rb_utils.gates_per_clifford(
+            transpiled_circuits_list=transpiled_circs_list,
+            clifford_lengths=xdata[0],
+            basis=['u2', 'u3', 'cx'],
+            qubits=target_qubits)
 
-    gpc = rb.rb_utils.gates_per_clifford(
-        transpiled_circuits_list=transpiled_circs_list,
-        clifford_lengths=xdata[0],
-        basis=['u2', 'u3', 'cx'],
-        qubits=target_qubits)
-
-    epc = rb_fit.fit[0]['epc']
+        epc = rb_fit.fit[0]['epc']
+        print(gpc, epc)
+    except:
+        epc = 0
+        gpc = 0
     return gpc, epc
 
 def get_error_1q(target_qubit, simulator, length_range = [20, 1500]):
-    # 先搞单比特的rb
     rb_pattern = [[target_qubit]]
     target_qubits = [target_qubit]
     rb_circs, xdata = rb.randomized_benchmarking_seq(
@@ -141,16 +143,13 @@ def get_error_1q(target_qubit, simulator, length_range = [20, 1500]):
     return epg  # epg['u3'] 作为单比特门误差    #sum(epg.values()) / len(epg)
 
 
-# TODO: 现在的噪音太小了
 def get_error_2q(target_qubits, error_1qs,  simulator, length_range = [20, 600]):
     error_1qs = [error_1qs[qubit] for qubit in target_qubits]
     assert len(target_qubits) == 2  and len(error_1qs) == 2
-    
-    # 先搞单比特的rb
+
     rb_pattern = [target_qubits]
     target_qubits = target_qubits
     
-    # 这个好像特别慢
     rb_circs, xdata = rb.randomized_benchmarking_seq(
         rb_pattern=rb_pattern, nseeds=5, length_vector=np.arange(length_range[0], length_range[1], (length_range[1] - length_range[0]) //10), )  # seed 越多跑的越久
 
