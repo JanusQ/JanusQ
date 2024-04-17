@@ -19,10 +19,15 @@ docker pull jxhhhh:janusq:latest
 ## Structure of the Framework
 - JanusCT
   - vectorization
+    - janusq/analysis/vectorization.py: This python script holds code related to the generation of path table and the vecterization of circuits
   - fidelity preidiction
+    - janusq/analysis/fidelity_prediction.py: This python script holds code related to training a model and using it to predict the fidelity of a circuit.
   - fidelity optimization
+    -  janusq/optimizations/mapping/mapping_ct.py：This python script holds code related to a typical compilation flow includes routing and scheduling. The routing pass transforms the circuit to satisfy the processor topology.
   - unitary decomposition
-  - bug identification
+    - janusq/analysis/unitary_decompostion.py: This python script holds code related to takes a unitary as input and decomposes it into matrices of basic gates, resulting in an equivalent circuit.
+  - bug identification: identify the potential bugs in the quantum algorithm implementation.
+    - 
 - JanusFEM
   - readout calibration
 - HyQSAT
