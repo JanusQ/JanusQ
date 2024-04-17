@@ -293,6 +293,7 @@ class RandomwalkModel():
     def vectorize(self, circuit: Circuit, target_gates: list[Gate] = None) -> np.ndarray:
         if not isinstance(circuit, Circuit):
             assert target_gates is None
+            assert isinstance(circuit, list)
             return map(self.vectorize, circuit, multi_process=False)
             
         if target_gates is None:

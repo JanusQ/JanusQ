@@ -934,7 +934,7 @@ def decompose(target_U, allowed_dist, backend: Backend, max_n_solutions=1, multi
         for synthesized_solution in finetune_solutions
     ]
 
-    return finetune_solutions[int(np.argmin(n_gate_solutions))]
+    return Circuit(finetune_solutions[int(np.argmin(n_gate_solutions))])
 
 @ray.remote
 def find_parmas_remote(*args, **kargs):

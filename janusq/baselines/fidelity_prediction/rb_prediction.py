@@ -82,7 +82,6 @@ def run_rb(simulator: NoisySimulator, rb_pattern, rb_circs, xdata, target_qubits
     
     jobs = []
     for rb_index, rb_circ in enumerate(rb_circs):
-        # 其实是一组电路, 应该是同一个电路的不同长度
         
         fit_rb_circ = transpile(rb_circ, basis_gates=['u2', 'u3', 'cx'])  # ibm 只能有u1, u2, u3和 cx 垃圾玩意
         real_rb_circ = transpile(rb_circ, basis_gates=basis_gates)  # 实际执行的电路
@@ -111,20 +110,16 @@ def run_rb(simulator: NoisySimulator, rb_pattern, rb_circs, xdata, target_qubits
 
 
     # Add data to the fitter
-    try:
-        rb_fit.add_data([job.result() for job in jobs])
 
-        gpc = rb.rb_utils.gates_per_clifford(
-            transpiled_circuits_list=transpiled_circs_list,
-            clifford_lengths=xdata[0],
-            basis=['u2', 'u3', 'cx'],
-            qubits=target_qubits)
+    rb_fit.add_data([job.result() for job in jobs])
 
-        epc = rb_fit.fit[0]['epc']
-        print(gpc, epc)
-    except:
-        epc = 0
-        gpc = 0
+    gpc = rb.rb_utils.gates_per_clifford(
+        transpiled_circuits_list=transpiled_circs_list,
+        clifford_lengths=xdata[0],
+        basis=['u2', 'u3', 'cx'],
+        qubits=target_qubits)
+
+    epc = rb_fit.fit[0]['epc']
     return gpc, epc
 
 def get_error_1q(target_qubit, simulator, length_range = [20, 1500]):
@@ -154,16 +149,17 @@ def get_error_2q(target_qubits, error_1qs,  simulator, length_range = [20, 600])
         rb_pattern=rb_pattern, nseeds=5, length_vector=np.arange(length_range[0], length_range[1], (length_range[1] - length_range[0]) //10), )  # seed 越多跑的越久
 
     # print(rb_circs[0][-1])
+    try:
+        gpc, epc = run_rb(simulator, rb_pattern, rb_circs, xdata, target_qubits)
 
-    gpc, epc = run_rb(simulator, rb_pattern, rb_circs, xdata, target_qubits)
-
-    # calculate 1Q EPGs
-    epg = rb.calculate_2q_epg(
-        gate_per_cliff=gpc,
-        epc_2q=epc,
-        qubit_pair=target_qubits,
-        list_epgs_1q=error_1qs)
-    
+        # calculate 1Q EPGs
+        epg = rb.calculate_2q_epg(
+            gate_per_cliff=gpc,
+            epc_2q=epc,
+            qubit_pair=target_qubits,
+            list_epgs_1q=error_1qs)
+    except:
+        epg = 0
     return epg
 
 @ray.remote

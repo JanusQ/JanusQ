@@ -17,7 +17,7 @@ with open(os.path.join(dirname, 'fidelity_dataset_5q.pkl'), "rb") as f:
 
 
 with open(os.path.join(dirname, 'benchmark_circuits.pickle'), "rb") as f:
-    benchmark_circuits = pickle.load(f)  
+    benchmark_circuits_and_results = pickle.load(f)  
 
 with open(os.path.join(dirname, 'ghz_8qubit.pickle'), "rb") as f:
     ghz_8qubit = pickle.load(f) 
