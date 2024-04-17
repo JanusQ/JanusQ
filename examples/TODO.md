@@ -13,8 +13,9 @@
     2. 准备简单的可以在ipython上跑的例子
 
 张涵禹:
-    1. 删掉 pgmpy
+    1. ppt 文字
 
 
 陶辰宁:
-    1. examples/test_run_realQC
+    1. notebook 再改下
+    

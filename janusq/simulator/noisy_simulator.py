@@ -102,7 +102,6 @@ class NoisySimulator():
     def to_qiskit(circuit: Circuit) -> QuantumCircuit:
         operated_qubits = circuit.operated_qubits
 
-        # 需要map下不然会超过最大值
         new_circuit = circuit.copy()
         for gate in new_circuit.gates:
             gate['qubits'] = [operated_qubits.index(

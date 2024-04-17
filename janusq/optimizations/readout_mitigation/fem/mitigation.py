@@ -1,39 +1,19 @@
 from collections import defaultdict
 from functools import lru_cache
-
-import scipy.io as sio
 import random
-
 import numpy as np
-from time import time
 import matplotlib.pyplot as plt
-import jax
-from jax import numpy as jnp
-from jax import vmap
-# from jax import random
 import random
-import math
-# import time
 from tqdm import tqdm
-from janusq.data_objects.circuit import Circuit
-
-from janusq.tools.ray_func import wait, map
-
+from janusq.tools.ray_func import map
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 import networkx.algorithms.approximation.maxcut as maxcut
-from scipy.stats import pearsonr
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import mutual_info_score
-
-from itertools import combinations
-
 from pgmpy.factors.discrete import TabularCPD
 from pgmpy.models import BayesianNetwork
 from pgmpy.inference import VariableElimination
-import ray
 from janusq.optimizations.readout_mitigation.fem.tools import all_bitstrings, npformat_to_statuscnt, statuscnt_to_npformat, to_int
 
 
@@ -87,7 +67,6 @@ def construct_cpd(args: tuple[int, list[int]], bench_results: tuple[np.ndarray, 
             if op_types[related_qubits.index(qubit)] == 2:
                 data[2, col_index] = 1
             else:
-                # TODO: 机器学习模型不太准确
                 if infer_model is None:
                     X, Y = extend(bench_results, related_qubits, qubit)
                     infer_model = GaussianNB()
@@ -139,7 +118,7 @@ def construct_bayesian_network(bench_results, n_qubits, groups, multi_process=Tr
     cpds += map(construct_cpd, [(qubit, qubit_to_group[qubit]) for qubit in range(
         n_qubits)], bench_results=bench_results, multi_process=multi_process)
 
-    model = BayesianNetwork(network_edges)  # TODO: 可以加latent
+    model = BayesianNetwork(network_edges)  
     model.add_cpds(*cpds)
     infer = VariableElimination(model)
 
@@ -207,21 +186,20 @@ def correlation_based_partation(bench_results, group_size, n_qubits, draw_groupi
 
     groups = partition(list(graph.nodes()))
 
-# 创建新的图形
+# Create a new graph
     partitioned_graph = nx.Graph()
 
-    # 添加节点
+    # Add nodes
     for group in groups:
         for node in group:
             partitioned_graph.add_node(node)
 
-    # 添加边
+    # Add edges
     for edge in graph.edges():
         for group in groups:
             if edge[0] in group and edge[1] in group:
                 partitioned_graph.add_edge(edge[0], edge[1])
 
-    # 绘制图形
     if n_qubits < 10:
         plt.subplot(1, 2, 2)
     nx.draw(partitioned_graph, with_labels=True, font_weight='bold')
@@ -275,9 +253,9 @@ class TPEngine():
         }
 
         self.groups = []
-        self.qubit_map = []  # 内部的顺序->外部的顺序
+        self.qubit_map = []  # Internal order -> External order
         for group in group_to_M:
-            self.qubit_map += list(group)  # 假设已经sort过了
+            self.qubit_map += list(group)  
             self.groups.append(group)
 
         self.invqubit_map = [0] * self.n_qubits
@@ -285,7 +263,7 @@ class TPEngine():
             self.invqubit_map[old_pos] = real_pos
 
     def run(self, statscnts: dict, threshold: float = None, group_to_invM=None):
-        '''假设group之间没有重叠的qubit'''
+        '''Assuming there are no overlapping qubits between groups'''
         statscnts = permute(statscnts, self.qubit_map)
 
         if group_to_invM is None:
@@ -331,7 +309,7 @@ class TPEngine():
                 # now_values = next_values
 
             for basis, value in zip(now_basis, now_values):
-                rm_prob[basis] += value  # 这里的basis是按照group的顺序的
+                rm_prob[basis] += value  # the basis is in the order of the groups
 
         rm_prob = {
             basis: value
@@ -371,7 +349,6 @@ class Iteration():
     def unmeasureed_index(self, group_size):
         return np.array([index for index, bstr in enumerate(all_bitstrings(group_size, base=3)) if 2 not in bstr])
 
-    # 这里的映射很乱
     @lru_cache
     def get_engine(self, measured_qubits: list) -> TPEngine:
         n_measured_qubits = len(measured_qubits)
@@ -395,12 +372,12 @@ class Iteration():
                 }
                 )
                 posterior_v: np.ndarray = posterior_p.values.reshape(
-                    3**n_group_measured_qubits)  # 变成了M中列的数据
+                    3**n_group_measured_qubits)  # It has become data in the columns of matrix M
                 posterior_v = posterior_v[self.unmeasureed_index(
-                    n_group_measured_qubits)]  # 剃掉包含2的
+                    n_group_measured_qubits)]  
 
                 assert abs(sum(posterior_v) -
-                           1) < 1e-2, sum(posterior_v)  # 后面可以删了
+                           1) < 1e-2, sum(posterior_v)  
 
                 M[:, to_int(bstr, base=2)] = posterior_v
 
@@ -421,7 +398,7 @@ class Iteration():
 
         engine = self.get_engine(measured_qubits)
         statscnt = downsample_statuscnt(
-            statscnt, measured_qubits)  # 剃掉不测量的比特
+            statscnt, measured_qubits)  # Trim the unmeasured qubits
     
 
         mitigated_statscnts = engine.run(statscnt, threshold=threshold)

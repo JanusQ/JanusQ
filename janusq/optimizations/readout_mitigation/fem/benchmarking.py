@@ -1,17 +1,12 @@
-'''生成用于测量M的电路'''
+"Generate a circuit for measuring M"
 import logging
 import random
 import numpy as np
 from qiskit import QuantumCircuit
-
 from janusq.data_objects.backend import Backend
 from janusq.data_objects.circuit import Circuit
-
-from janusq.optimizations.readout_mitigation.fem.tools import all_bitstrings, decimal, expand, statuscnt_to_npformat
+from janusq.optimizations.readout_mitigation.fem.tools import all_bitstrings, decimal, statuscnt_to_npformat
 from janusq.tools.ray_func import map
-
-from janusq.simulator.noisy_simulator import NoisySimulator
-from janusq.simulator.readout_error_model import ReadoutErrorModel
 
 def gen_benchmarking_circuit(real: np.ndarray) -> Circuit:              
     measured_qubits = [
@@ -42,7 +37,7 @@ class EnumeratedProtocol():
         
         reals = []
         for real in all_bitstrings(self.n_qubits, base = 3):
-            if all(real ==  2): continue  # 没有测量
+            if all(real ==  2): continue  # No measurement
             
 
             real_rev = real[::-1]
@@ -55,17 +50,14 @@ class EnumeratedProtocol():
 
 
 
-'''TODO: 还跑不了'''
 class IterativeSamplingProtocol():
     def __init__(self, backend: Backend, hyper = 1, n_samples_iter = 1, threshold = 1e-3):
-        '''TODO: hyper是啥'''
         self.backend = backend
         self.n_qubits = backend.n_qubits
         self.hyper = hyper
         self.n_samples_iter = n_samples_iter
         self.threshold = threshold
         self.cnt = self.hyper * self.n_qubits
-
 
         self.benchmarking_results: list[dict] = None
         
@@ -109,7 +101,7 @@ class IterativeSamplingProtocol():
             bitstring = '0' * (n_qubits - len(bitstring)) + bitstring
             
             if bitstring == '2' * self.n_qubits or bitstring in bitstring_dataset:
-                continue  # 没有测量
+                continue  
             if filter is not None:
                 if bitstring[filter[0]] != filter[2] or bitstring[filter[1]] != filter[3]:
                     continue
@@ -249,7 +241,7 @@ class IterativeSamplingProtocol():
 
                 while len(protocol_results) == 0:
                     if len(machine_data) == 0:
-                        logging.warning(f'当 threshold = ', threshold, '被薅空了')
+                        logging.warning(f'when threshold = ', threshold, 'being drained')
                         return protocol_results_dataset
                     kth_max += 1
 
@@ -265,7 +257,7 @@ class IterativeSamplingProtocol():
             for ele in protocol_results:
                 real_bitstring, status_count  = ele
                 meas_np, cnt_np = status_count
-                qubit_count += np.sum(cnt_np)  # 固定值
+                qubit_count += np.sum(cnt_np)  # fixed value
                 
 
                 for q0 in range(n_qubits):
@@ -308,6 +300,5 @@ class IterativeSamplingProtocol():
         # ideal_ops: list[np.ndarray], execution_results: list[tuple[np.ndarray, np.ndarray]]
         self.benchmarking_results: list[tuple[np.ndarray, np.ndarray]] = map(statuscnt_to_npformat, results)
         # benchmarking_result_to_np_format(results)
-        # 可以变成完全矩阵计算
 
     

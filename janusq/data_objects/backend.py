@@ -179,23 +179,6 @@ class GridBackend(Backend):
         Backend.__init__(self, n_qubits, topology = topology, adjlist = adjlist, **kwargs)
         
 
-    # def get_grid_adjlist(size, max_distance):
-    #     neigh_info = defaultdict(list)
-
-    #     for x in range(size):
-    #         for y in range(size):
-    #             qubit = x * size + y
-    #             for neigh_x in range(x - 1, x + 2):
-    #                 for neigh_y in range(y - 1, y + 2):
-    #                     if neigh_x < 0 or neigh_x >= size or neigh_y < 0 or neigh_y >= size or (
-    #                             x == neigh_x and y == neigh_y):
-    #                         continue
-    #                     if ((x - neigh_x) ** 2 + (y - neigh_y) ** 2) <= max_distance ** 2:
-    #                         neigh_qubit = neigh_x * size + neigh_y
-    #                         neigh_info[qubit].append(neigh_qubit)
-
-    #     return neigh_info
-
 class LinearBackend(Backend):
     def __init__(self, n_qubits, dist_threadhold = 100, **kwargs):
         topology = {
