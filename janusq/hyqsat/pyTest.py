@@ -53,13 +53,13 @@ def match_result(res, cur):
     elif cur.startswith("UNSAT"):
         res["isSat"] = False
 
-def solveByMinisat(cnf_file, result_dir="", verb=1, cpuLim=0, memLim=0, strictp=False):
+def solve_by_minisat(cnf_file, result_dir="", verb=1, cpu_lim=0, mem_lim=0, strictp=False):
     if verb:
         verb = 1
     else:
         verb = 0
     res = {}
-    process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), os.path.join(current_dir, cnf_file), result_dir, str(verb), str(cpuLim),  str(memLim), str(strictp), "minisat", "null"], stdout=subprocess.PIPE, text=True)
+    process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), os.path.join(current_dir, cnf_file), result_dir, '1', str(cpu_lim),  str(mem_lim), str(strictp), "minisat", "null"], stdout=subprocess.PIPE, text=True)
     
     while True:
         output = process.stdout.readline()
@@ -68,14 +68,15 @@ def solveByMinisat(cnf_file, result_dir="", verb=1, cpuLim=0, memLim=0, strictp=
         if output:
             cur = output.strip()
             match_result(res, cur)
-            logging.info(cur)
+            if verb:
+                logging.info(cur)
     return res
-def solveByHyqsat(cnf_file, result_dir="1",verb=True, cpuLim=0, memLim=0, strictp=False):
+def solve_by_janusct(cnf_file, result_dir="1",verb=True, cpu_lim=0, mem_lim=0, strictp=False):
     if verb:
         verb = 1
     else:
         verb = 0
-    process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), os.path.join(current_dir, cnf_file), result_dir, str(verb), str(cpuLim),  str(memLim), str(strictp), "quantum", os.path.join(os.path.dirname(inspect.getfile(recongnize)), 'python/')], stdout=subprocess.PIPE, text=True)
+    process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), os.path.join(current_dir, cnf_file), result_dir, '1', str(cpu_lim),  str(mem_lim), str(strictp), "quantum", os.path.join(os.path.dirname(inspect.getfile(recongnize)), 'python/')], stdout=subprocess.PIPE, text=True)
     res = {}
     while True:
         output = process.stdout.readline()
@@ -84,6 +85,7 @@ def solveByHyqsat(cnf_file, result_dir="1",verb=True, cpuLim=0, memLim=0, strict
         if output:
             cur = output.strip()
             match_result(res, cur)
-            logging.info(cur)
+            if verb:
+                logging.info(cur)
     return res
 

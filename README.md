@@ -19,14 +19,22 @@ docker pull jxhhhh:janusq:latest
 ## Structure of the Framework
 - JanusCT
   - vectorization
+    - janusq/analysis/vectorization.py: This python script holds code related to the generation of path table and the vecterization of circuits
   - fidelity preidiction
+    - janusq/analysis/fidelity_prediction.py: This python script holds code related to training a model and using it to predict the fidelity of a circuit.
   - fidelity optimization
+    -  janusq/optimizations/mapping/mapping_ct.py：This python script holds code related to a typical compilation flow includes routing and scheduling. The routing pass transforms the circuit to satisfy the processor topology.
   - unitary decomposition
-  - bug identification
+    - janusq/analysis/unitary_decompostion.py: This python script holds code related to takes a unitary as input and decomposes it into matrices of basic gates, resulting in an equivalent circuit.
+  - bug identification: identify the potential bugs in the quantum algorithm implementation.
+    - 
 - JanusFEM
-  - readout calibration
+  - benchmarking.py. Generate a circuit for measuring calibration matrices.
+  - mitigation.py. Implement iterative calibration, which includes quantifying interactions between qubits and constructing Bayesian networks.
+  - tools.py. Implement data format conversion.
 - HyQSAT
-  - solve sat domain problem
+  - hyqsat/common: This dir stores common functions about cnf files, such as readCNF.
+  - hyqsat/solveSatBy**.py: The main python function; use to solve sat problem.
 - time crystal
 
 

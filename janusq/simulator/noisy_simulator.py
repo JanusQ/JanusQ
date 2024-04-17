@@ -45,8 +45,7 @@ class NoisySimulator():
 
     def obtain_circuit_fidelity(self, circuit: Circuit, n_samples=1000, circuit_reps=5):
         n_qubits = circuit.n_qubits
-        true_result = self.execute_noise_free(circuit)
-
+        
         fidelities = []
         noisy_countses = []
         for _ in range(circuit_reps):
@@ -56,6 +55,8 @@ class NoisySimulator():
             simulated_circuit = Circuit(
                 layer_1q, layer_1q.num_qubits) + circuit + Circuit(layer_1q.inverse(), layer_1q.num_qubits)
 
+            true_result = self.execute_noise_free(simulated_circuit)
+            
             noisy_result, n_error_paths = self.execute(
                 simulated_circuit, n_samples, get_n_error_paths=True)
             fidelities.append(hellinger_fidelity(

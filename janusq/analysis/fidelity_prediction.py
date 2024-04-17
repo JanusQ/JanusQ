@@ -137,8 +137,8 @@ class FidelityModel():
 
                     batch_losses.append(loss_value)
 
-                valid_loss += batch_loss(
-                    params, *n_gates2circuit_valid[gate_num]) / len(n_gates2circuit_valid[gate_num][2])
+                if n_gates2circuit_valid.__contains__(gate_num): 
+                    valid_loss += batch_loss(params, *n_gates2circuit_valid[gate_num]) / len(n_gates2circuit_valid[gate_num][2])
 
 
             opt_history.update(valid_loss, params)
