@@ -1,7 +1,14 @@
-from functools import reduce
-import random
-from collections import defaultdict
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 03:33:02
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-18 08:33:33
+FilePath: /JanusQ/janusq/analysis/fidelity_prediction.py
+Description: 
 
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
+import random
 import jax
 import numpy as np
 import optax
@@ -22,6 +29,10 @@ PARAM_RESCALE = 10000  # helps eliminate loss of significance
 
 class FidelityModel():
     def __init__(self, vec_model: RandomwalkModel):
+        '''
+        description: fidelity model base on random walk model to vectorized gate, and fidelity model train base on all vectors  
+        param {RandomwalkModel} vec_model: random walk model
+        '''
         self.vec_model = vec_model
         self.backend = vec_model.backend
 
@@ -30,6 +41,15 @@ class FidelityModel():
         self.devices = list(self.vec_model.device_to_pathtable.keys())
 
     def train(self, train_dataset: tuple[list[Circuit], list[float]], validation_dataset: tuple[list[Circuit], list[float]] = None, max_epoch=1000, verbose=True, learning_rate: float = 0.01, multi_process = True):
+        '''
+        description: using MLP to train a fidelity preiction model
+        param {tuple} train_dataset: train dataset
+        param {tuple} validation_dataset: validation dataset
+        param {int} max_epoch: maximum train epochs
+        param {int} verbose: weather print log
+        param {float} learning_rate: learning rate of optimizor
+        param {bool} multi_process: weather to enable multi-process
+        '''
         vec_model = self.vec_model
         if validation_dataset is None:
             train_cirucits, validation_circuits, train_fidelities, validation_fidelities = train_test_split(
@@ -165,6 +185,10 @@ class FidelityModel():
         return np.array(gate_devices)
 
     def predict_circuit_fidelity(self, circuit: Circuit):
+        '''
+        description: use random walk model to vectorize a circuit and predict its fidelity
+        return {float}: circuit fidelity
+        '''
         error_params = self.error_weights
 
         gate_devices = self._obtain_gate_devices(circuit)
@@ -173,7 +197,13 @@ class FidelityModel():
         return predict_circuit_fidelity(
             error_params, vecs, gate_devices)
 
+
     def predict_gate_fidelities(self, circuit: Circuit):
+        '''
+        description: predict each gate fidelity
+        param {Circuit} circuit: target circuit
+        return {np.ndarray} gate fidelities
+        '''
         error_params = self.error_weights
 
         gate_devices = self._obtain_gate_devices(circuit)
@@ -199,6 +229,9 @@ class FidelityModel():
                 all_path_errors.append((path, float(error)))
         all_path_errors.sort(key=lambda elm: -elm[1])
         return all_path_errors
+    
+
+
     
     def plot_path_error(self, title='', top_k=20, save_path=None, plot=True):
         '''

@@ -1,3 +1,13 @@
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 03:33:02
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-18 09:30:06
+FilePath: /JanusQ/janusq/dataset/__init__.py
+Description: 
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
 
 
 import logging
@@ -15,6 +25,7 @@ dirname = os.path.dirname(__file__)
 with open(os.path.join(dirname, 'fidelity_dataset_5q.pkl'), "rb") as f:
     real_qc_5bit = pickle.load(f)   # TODO: 整理成circuits一个数组，fidelity一个数组的形式
 
+real_qc_5bit = (real_qc_5bit[0][:200], real_qc_5bit[1][:200])
 
 with open(os.path.join(dirname, 'benchmark_circuits.pickle'), "rb") as f:
     benchmark_circuits_and_results = pickle.load(f)  

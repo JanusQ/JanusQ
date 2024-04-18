@@ -54,11 +54,8 @@ class EnumeratedProtocol():
         return np.array(reals, dtype=np.int8), circuits
 
 
-
-'''TODO: 还跑不了'''
 class IterativeSamplingProtocol():
     def __init__(self, backend: Backend, hyper = 1, n_samples_iter = 1, threshold = 1e-3):
-        '''TODO: hyper是啥'''
         self.backend = backend
         self.n_qubits = backend.n_qubits
         self.hyper = hyper

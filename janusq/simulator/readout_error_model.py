@@ -4,7 +4,7 @@ from janusq.data_objects.backend import Backend
 import numpy as np
 
 from janusq.tools.saver import load, dump
-from qiskit_aer.noise import NoiseModel, depolarizing_error, thermal_relaxation_error, ReadoutError
+from qiskit_aer.noise import NoiseModel,  ReadoutError
 
 class ReadoutErrorModel():
     def __init__(self, backend: Backend, M_per_qubit: list[np.ndarray]):

@@ -1,18 +1,24 @@
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 03:33:02
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-18 08:14:13
+FilePath: /JanusQ/janusq/simulator/noisy_simulator.py
+Description: 
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
 import random
-import time
 from collections import defaultdict
 
-import ray
 from numpy import pi
-from qiskit import Aer, ClassicalRegister
-from qiskit import QuantumCircuit, execute
+from qiskit import QuantumCircuit, execute, Aer
 from qiskit.quantum_info.analysis import hellinger_fidelity
 from janusq.analysis.vectorization import RandomwalkModel, extract_device
 from janusq.data_objects.backend import Backend
 from janusq.data_objects.circuit import Circuit, Gate, Layer, SeperatableCircuit, circuit_to_qiskit, qiskit_to_circuit
 from janusq.data_objects.random_circuit import random_1q_layer
 
-# from qiskit_aer import import qiskit
 from qiskit_aer.noise import NoiseModel, depolarizing_error, thermal_relaxation_error
 
 from janusq.simulator.readout_error_model import ReadoutErrorModel
@@ -20,11 +26,16 @@ from janusq.simulator.readout_error_model import ReadoutErrorModel
 from .gate_error_model import GateErrorModel
 import numpy as np
 
-# from upstream.randomwalk_model import extract_device, RandomwalkModel
-
-
+'''
+description: simulator with noise 
+'''
 class NoisySimulator():
-    def __init__(self, backend, gate_error_model: GateErrorModel = None, readout_error_model: ReadoutErrorModel = None):
+    def __init__(self, backend: Backend, gate_error_model: GateErrorModel = None, readout_error_model: ReadoutErrorModel = None):
+        '''
+        param {*} backend: backend which simulation  based on
+        param {GateErrorModel} gate_error_model: model of gate error
+        param {ReadoutErrorModel} readout_error_model: model of readout error
+        '''
         self.gate_error_model: GateErrorModel = gate_error_model
         self.readout_error_model: ReadoutErrorModel = readout_error_model
         
@@ -44,6 +55,12 @@ class NoisySimulator():
         self.n_qubits = backend.n_qubits
 
     def obtain_circuit_fidelity(self, circuit: Circuit, n_samples=1000, circuit_reps=5):
+        '''
+        description: obtain circuit simulate fidelity as ground truth fidelity
+        param {Circuit} circuit: target circuit
+        param {*} n_samples: sampling times
+        param {*} circuit_reps: repeat times. repeat simulation and get the average fidelity
+        '''
         n_qubits = circuit.n_qubits
         
         fidelities = []
@@ -66,6 +83,9 @@ class NoisySimulator():
         return sum(fidelities)/len(fidelities), sum(noisy_countses)/len(noisy_countses)
 
     def obtain_seperable_circuit_fidelity(self, circuit: SeperatableCircuit, n_samples=1000, circuit_reps=5):
+        '''
+        description: same as self.obtain_circuit_fidelity
+        '''
         n_qubits = circuit.n_qubits
 
         gate_vecs = self.vec_model.vectorize(circuit)
@@ -100,6 +120,9 @@ class NoisySimulator():
 
     @staticmethod
     def to_qiskit(circuit: Circuit) -> QuantumCircuit:
+        '''
+        description: convert circuit to qiskit circuit
+        '''
         operated_qubits = circuit.operated_qubits
 
         # 需要map下不然会超过最大值
@@ -123,6 +146,9 @@ class NoisySimulator():
         return qiskit_circuit
 
     def get_noise_model(self, qubit_mapping: list[int],):
+        '''
+        description: return nosie model
+        '''
         noise_model = NoiseModel()
         
         if self.gate_error_model is not None:
@@ -133,7 +159,18 @@ class NoisySimulator():
 
         return noise_model
 
-    def execute(self, circuit: Circuit, n_samples=2000, gate_vecs: np.ndarray = None, get_n_error_paths = False) -> dict[str, int]:
+
+
+    
+    def execute(self, circuit: Circuit, n_samples:int=2000, gate_vecs: np.ndarray = None, get_n_error_paths:bool = False) -> dict[str, int]:
+        '''
+        description: execute with spacial and tempory error
+        param {Circuit} circuit: circuit need to be simulate
+        param {int} n_samples: sample times
+        param {np.array} gate_vecs: gate vectors
+        param {bool} get_n_error_paths: weather to return the count of error pattern we inject
+        return {dict} state count: a dict contains state with its count
+        '''
         circuit, n_error_paths = self._inject_context_error(circuit, gate_vecs)
         noise_model = self.get_noise_model(circuit.operated_qubits)
         result = execute(self.to_qiskit(circuit), self.qasm_simulator,
@@ -143,10 +180,21 @@ class NoisySimulator():
         else:
             return result.result().get_counts()
 
+    
     def execute_noise_free(self, circuit: Circuit, n_samples=2000) -> dict[str, int]:
+        '''
+        description: call qiskit simulator to execute without noise
+
+        '''
         return execute(self.to_qiskit(circuit), self.qasm_simulator, shots=n_samples,).result().get_counts()
 
+
+
+
     def _inject_context_error(self, circuit: Circuit, gate_vecs: np.ndarray = None) -> tuple[Circuit, int]:
+        '''
+        description: inject spacial and tempory error when a gete has a path in error model
+        '''
         if self.gate_error_model is None:
             return circuit, 0
         

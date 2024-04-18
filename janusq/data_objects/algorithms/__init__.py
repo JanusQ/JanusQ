@@ -1,3 +1,13 @@
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-16 13:33:36
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-18 09:01:00
+FilePath: /JanusQ/janusq/data_objects/algorithms/__init__.py
+Description: 
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
 import random
 
 from qiskit import QuantumCircuit, transpile, QuantumRegister
@@ -11,6 +21,15 @@ from . import hamiltonian_simulation, vqc, ising, qft, qknn, qsvm, swap, vqe, QA
 
 
 def get_data(id, qiskit_circuit: QuantumCircuit, mirror, backend: Backend, should_transpile=True, unitary = False):
+    '''
+    description: 
+    param {str} id: algorithm name 
+    param {QuantumCircuit} qiskit_circuit: algorithm circuit 
+    param {bool} mirror: Whether to add the reverse circuit of the circuit to the original circuit
+    param {Backend} backend: algorithm transpile to fit backend
+    param {bool} should_transpile: weather to transpile the algorithm circuit
+    param {bool} unitary: weather to return algorithm unitary
+    '''
     new_qiskit_circuit = QuantumCircuit(qiskit_circuit.num_qubits)
     for instruction in qiskit_circuit:
         if instruction.operation.name in ('id',):
@@ -51,7 +70,15 @@ def get_data(id, qiskit_circuit: QuantumCircuit, mirror, backend: Backend, shoul
         return circuit
 
 
-def get_algorithm_circuits(n_qubits, backend: Backend, algs = ['qft', 'hs', 'ising', 'qknn', 'qsvm', 'vqc', 'ghz', 'grover'], unitary = False) -> list[Circuit]:
+def get_algorithm_circuits(n_qubits: int, backend: Backend, algs = ['qft', 'hs', 'ising', 'qknn', 'qsvm', 'vqc', 'ghz', 'grover'], unitary:bool = False) -> list[Circuit]:
+    '''
+    description: get specified algorithm circuit
+    param {int} n_qubits: the number of qubit
+    param {Backend} backend: algorithm transpile to fit backend
+    param {list[str]} algs: specifed algorithm
+    param {bool} unitary: weather to return algorithm unitary
+    return {list[Circuit]} circuits: all algorithm circuits
+    '''
     circuits = []
     mirror = False
 

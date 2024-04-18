@@ -27,7 +27,10 @@ def instruction2str(instruction):
     return f'{op_name},{",".join([str(_) for _ in qubits])}'
 
 
-def extract_device(gate):
+def extract_device(gate:Gate):
+    '''
+    description: device gate execute on 
+    '''
     if len(gate['qubits']) == 2:
         return tuple(sorted(gate['qubits']))
     else:
@@ -122,13 +125,23 @@ def _bfs_walk(traveled_paths: set, traveled_gates: list, path, circuit: Circuit,
         traveled_gates.remove(next_gate)
 
 
-def walk_from_gate(circuit_info, head_gate, n_walks, n_steps, adjlist,
+def walk_from_gate(circuit: Circuit, head_gate: Gate, n_walks: int, n_steps: int, adjlist: list,
                    directions=('parallel', 'former', 'next')) -> set:
+    '''
+    description: execute walks on a gate
+    param {Circuit} circuit: the circuit that gate belong to
+    param {Gate} head_gate: current gate 
+    param {int} n_steps: maximum number of random walks per gate
+    param {int} n_walks: maximum step size per random walk
+    param {tuple} directions: only three type of directions: 'parallel', 'former', 'next'
+    param {list} adjlist: adjacent qubits 
+    return {set}: paths colleted
+    '''
     traveled_paths = set()
 
     first_step = Path([Step(head_gate, 'loop', head_gate)])
     traveled_gates = [head_gate]
-    _bfs_walk(traveled_paths, traveled_gates, first_step, circuit_info, head_gate, head_gate, adjlist, n_steps, n_walks,
+    _bfs_walk(traveled_paths, traveled_gates, first_step, circuit, head_gate, head_gate, adjlist, n_steps, n_walks,
               directions)
 
     op_qubits_str = instruction2str(head_gate)
@@ -152,11 +165,14 @@ def walk_on_circuit(circuit: Circuit, n_steps: int, n_walks: int, adjlist: dict,
 
 
 class RandomwalkModel():
-    def __init__(self, n_steps, n_walks, backend: Backend, directions=('parallel', 'former', 'next'), alpha: float = 1.0):
+    def __init__(self, n_steps: int = 1, n_walks:int = 30, backend: Backend = None, directions=('parallel', 'former', 'next'), alpha: float = 1.0):
         '''
-            n_walks: maximum number of random walks per gate
-            n_steps: maximum step size per random walk
+        param {int} n_steps: maximum number of random walks per gate
+        param {int} n_walks: maximum step size per random walk
+        param {Backend} backend: random walk base on the topology of backend 
+        param {tuple} directions: only three type of directions: 'parallel', 'former', 'next'
         '''
+
         self.model = None
 
         self.device_to_pathtable = defaultdict(
@@ -171,6 +187,10 @@ class RandomwalkModel():
         self.n_walks = n_walks
         self.dataset = None
 
+        if backend is None:
+            from janusq.data_objects.backend import FullyConnectedBackend
+            backend = FullyConnectedBackend(n_qubits  = 3)
+
         self.backend = backend
         self.directions = directions
         self.n_qubits = backend.n_qubits
@@ -181,9 +201,16 @@ class RandomwalkModel():
         return self.all_paths()
     
     def all_paths(self):
+        '''
+        description: all path collect from dataset
+        '''
         return reduce(lambda a, b: list(a if isinstance(a, list) else a.keys()) + list(b.keys()), self.device_to_pathtable.values())
     
-    def path_index(self, device, path):
+    def path_index(self, device: tuple, path: str):
+        '''
+        description:get the subscript of path in the path table
+        '''
+        
         pathtable = self.device_to_pathtable[device]
         reverse_pathtable = self.device_to_reverse_pathtable[device]
 
@@ -196,9 +223,21 @@ class RandomwalkModel():
     def has_path(self, device, path):
         return path in self.device_to_pathtable[device]
 
-    def train(self, circuits: list[Circuit], multi_process: bool = False, n_process: int = None, remove_redundancy=True, return_value = False):
-        logging.info(f'start random walk for {len(circuits)} circuits')
+    def train(self, circuits: list[Circuit] = None, multi_process: bool = False, n_process: int = None, remove_redundancy:bool=True, return_value:bool = False):
+        '''
+        description: convert each gate into a vector
+        param {list} circuits: circuit to train 
+        param {bool} multi_process: Whether to enable multi-process
+        param {int} n_process: the number of sub-process
+        param {bool} remove_redundancy: weather to remove redundancy path to reduce memory usage
+        param {bool} return_value: weather to return all gate vector
+        return {numpy.array}: return all gate vector if return_value is true
+        '''
+        if circuits is None:
+            from janusq.data_objects.random_circuit import random_circuits
+            circuits = random_circuits(self.backend, n_circuits=300, n_gate_list=[30, 50, 100], two_qubit_prob_list=[.4], reverse=True)
 
+        logging.info(f'start random walk for {len(circuits)} circuits')
         backend: Backend = self.backend
         adjlist: dict = backend.adjlist
         n_steps = self.n_steps
@@ -222,7 +261,7 @@ class RandomwalkModel():
                 for path in paths:
                     device_path_count[device][path] += 1
 
-        '''TODO: 很慢， 比特数大了就没法计算了'''
+        # TODO: too slow for a large number of qubits 
         redundant_paths = set()
         if remove_redundancy:
             for circuit, paths_per_gate in zip(circuits, paths_per_circuit):
@@ -267,30 +306,39 @@ class RandomwalkModel():
                 self.max_table_size = len(pathtable)
 
         vecs_per_circuit = []
-        for circuit, paths_per_gate in zip(circuits, paths_per_circuit):
-            gate_vecs = []
+        for circuit in circuits:
+            vecs_per_circuit.append(self.vectorize(circuit))
+        
+        #, paths_per_gate in zip(circuits, paths_per_circuit):
+        #     gate_vecs = []
 
-            for gate, gate_paths in zip(circuit.gates, paths_per_gate):
-                device = extract_device(gate)
-                path_indices = [
-                    self.path_index(device, path)
-                    for path in gate_paths
-                    if self.has_path(device, path)
-                ]
-                path_indices.sort()
+        #     for gate, gate_paths in zip(circuit.gates, paths_per_gate):
+        #         device = extract_device(gate)
+        #         path_indices = [
+        #             self.path_index(device, path)
+        #             for path in gate_paths
+        #             if self.has_path(device, path)
+        #         ]
+        #         path_indices.sort()
 
-                vec = np.zeros(self.max_table_size, dtype=np.int8)
-                if len(path_indices) != 0:
-                    vec[np.array(path_indices)] = 1.
-                gate_vecs.append(vec)
-                gate.vec = vec
+        #         vec = np.zeros(self.max_table_size, dtype=np.int8)
+        #         if len(path_indices) != 0:
+        #             vec[np.array(path_indices)] = 1.
+        #         gate_vecs.append(vec)
+        #         gate.vec = vec
 
-            vecs_per_circuit.append(np.array(gate_vecs))
+        #     vecs_per_circuit.append(np.array(gate_vecs))
 
         if return_value:
             return vecs_per_circuit   # paths_per_circuit
 
     def vectorize(self, circuit: Circuit, target_gates: list[Gate] = None) -> np.ndarray:
+        '''
+        description: vectorize a circuit or liat of gates use path table
+        param {Circuit} circuit: circuit need to be vectorized
+        param {list} target_gates: gates to be vectorized if circuit is None
+        return {np.ndarray}: vectors
+        '''
         if not isinstance(circuit, Circuit):
             assert target_gates is None
             assert isinstance(circuit, list)
@@ -303,7 +351,7 @@ class RandomwalkModel():
 
         vecs = []    
         for gate in target_gates:
-            if gate.vec is not None:
+            if 'vec' in gate and gate.vec is not None:
                 vec = gate.vec
             else:
                 paths = walk_from_gate(circuit, gate, self.n_walks, self.n_steps, adjlist,
@@ -363,7 +411,10 @@ class RandomwalkModel():
 
         return gate
 
-    def reconstruct(self, device, gate_vector: np.array) -> Circuit:
+    def reconstruct(self, device: tuple, gate_vector: np.array) -> Circuit:
+        '''
+        description: reconstruct circuit from gate vectors
+        '''
         paths = self.extract_paths_from_vec(device, gate_vector)
 
         def add_to_layer(layer, gate):

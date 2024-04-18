@@ -1,21 +1,37 @@
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 06:05:11
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-18 07:27:47
+FilePath: /JanusQ/janusq/data_objects/random_circuit.py
+Description: randomly generate various circuit for different data-driven analysis tasks
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
+
 import logging
 import random
 from cmath import pi
-from collections import defaultdict
 
 from qiskit import QuantumCircuit
 
 from janusq.data_objects.backend import Backend
-from janusq.data_objects.circuit import Circuit, SeperatableCircuit, circuit_to_qiskit, qiskit_to_circuit
+from janusq.data_objects.circuit import Circuit, SeperatableCircuit, qiskit_to_circuit
 import math
-'''
-randomly generate various circuit for different data-driven analysis tasks 
-'''
 
-# 直接编程layer_gates
-# 没从从coupling map里面挑两比特门
+
+
 
 def random_circuits(backend: Backend, n_circuits: int, n_gate_list: list, two_qubit_prob_list: list, reverse: bool = True) -> list[Circuit]:
+    '''
+    description: 
+    param {Backend} backend: circuit are generated based on backend
+    param {int} n_circuits: total number of circuit to generate 
+    param {list} n_gate_list: devide all circuit into several part, each part has ciruits with same number of gates specified in n_gate_list
+    param {list} two_qubit_prob_list: ciruits with same number of gates are alse devide into several part which has the same proportion of two qubit gate
+    param {bool} reverse: Whether to add the reverse circuit of the circuit to the end of the original circuit
+    return {list[Circuit]}: generate circuits
+    '''
     circuits = []
     for n_gates in n_gate_list:
         for two_qubit_prob in two_qubit_prob_list:
@@ -25,6 +41,7 @@ def random_circuits(backend: Backend, n_circuits: int, n_gate_list: list, two_qu
     
 # TODO: 检查下grouping_scheme的质量，会不会有太多很小的
 def random_grouping_scheme(backend: Backend, n_qubits_per_group: int): 
+
     grouping_scheme = []
     now_group = []
     
@@ -77,7 +94,15 @@ def random_seperatable_circuits(backend: Backend, n_circuits: int, n_qubits_per_
 
 
 
-def random_circuit(backend: Backend, n_gates, two_qubit_prob, reverse) -> Circuit:
+def random_circuit(backend: Backend, n_gates:int, two_qubit_prob:int, reverse:bool) -> Circuit:
+    '''
+    description: generate one citcuit 
+    param {Backend} backend: circuit is generated based on backend
+    param {int} n_gates: the number of gate
+    param {int} two_qubit_prob: the two qubit proportion of circuit
+    param {bool} reverse: Whether to add the reverse circuit of the circuit to the end of the original circuit
+    return {Circuit}
+    '''
     coupling_map, n_qubits = backend.coupling_map, backend.n_qubits
     basis_single_gates, basis_two_gates = backend.basis_single_gates, backend.basis_two_gates
     

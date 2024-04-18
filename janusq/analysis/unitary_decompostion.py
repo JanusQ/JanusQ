@@ -1,9 +1,7 @@
 from collections import defaultdict
 import copy
-import itertools
 import math
 import time
-import traceback
 from random import choice as random_choice, sample
 from random import randint
 

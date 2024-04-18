@@ -4,6 +4,7 @@ import os
 import subprocess
 import inspect
 import logging
+import json
 logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 current_dir = os.getcwd()
@@ -53,7 +54,17 @@ def match_result(res, cur):
     elif cur.startswith("UNSAT"):
         res["isSat"] = False
 
-def solve_by_minisat(cnf_file, result_dir="", verb=1, cpu_lim=0, mem_lim=0, strictp=False):
+def solve_by_minisat(cnf_file, save=False, result_dir=".", verb=1, cpu_lim=0, mem_lim=0, strictp=False):
+    '''
+    description: using minisat method to solve sat domain problem.
+    param {str} cnf_file: input a cnf file, which needs to be solve.
+    param {bool} save: weather save result in result dir.
+    param {str} result_dir: save result in result dir.
+    param {bool} verb: weather print log.
+    param {int} cpu_lim: cpu limit(core).
+    param {int} mem_lim: memory limit(MB).
+    param {bool} strictp: weather strict.
+    '''
     if verb:
         verb = 1
     else:
@@ -70,8 +81,20 @@ def solve_by_minisat(cnf_file, result_dir="", verb=1, cpu_lim=0, mem_lim=0, stri
             match_result(res, cur)
             if verb:
                 logging.info(cur)
+    with open(f'{result_dir}/cnf_file_result.txt', mode='w') as f:
+        json.dump(res, f)
     return res
-def solve_by_janusct(cnf_file, result_dir="1",verb=True, cpu_lim=0, mem_lim=0, strictp=False):
+def solve_by_janusct(cnf_file, save=False, result_dir=".",verb=True, cpu_lim=0, mem_lim=0, strictp=False):
+    '''
+    description: using janusct method to solve sat domain problem.
+    param {str} cnf_file: input a cnf file, which needs to be solve.
+    param {bool} save: weather save result in result dir.
+    param {str} result_dir: save result in result dir.
+    param {bool} verb: weather print log.
+    param {int} cpu_lim: cpu limit(core).
+    param {int} mem_lim: memory limit(MB).
+    param {bool} strictp: weather strict.
+    '''
     if verb:
         verb = 1
     else:
@@ -87,5 +110,7 @@ def solve_by_janusct(cnf_file, result_dir="1",verb=True, cpu_lim=0, mem_lim=0, s
             match_result(res, cur)
             if verb:
                 logging.info(cur)
+    with open(f'{result_dir}/cnf_file_result.txt', mode='w') as f:
+        json.dump(res, f)
     return res
 
