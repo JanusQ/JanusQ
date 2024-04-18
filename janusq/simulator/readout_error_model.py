@@ -4,6 +4,9 @@ from janusq.tools.saver import load, dump
 from qiskit_aer.noise import NoiseModel, ReadoutError
 
 class ReadoutErrorModel():
+    """
+    A class representing a readout error model for quantum simulation.
+    """
     def __init__(self, backend: Backend, M_per_qubit: list[np.ndarray]):
         self.n_qubits = backend.n_qubits
         self.backend = backend
@@ -12,6 +15,15 @@ class ReadoutErrorModel():
 
     @staticmethod
     def random_model(backend: Backend):
+        """
+        Create a random readout error model for the specified backend.
+
+        Args:
+            backend (Backend): The backend for which the readout error model is created.
+
+        Returns:
+        ReadoutErrorModel: The randomly generated readout error model.
+        """
         n_qubits = backend.n_qubits
         measure_fids = np.random.random(size=(n_qubits, 2))
         measure_fids = np.abs(measure_fids) / 10 + .9

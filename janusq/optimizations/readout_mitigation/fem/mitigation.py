@@ -3,10 +3,8 @@ from functools import lru_cache
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-import random
 from tqdm import tqdm
 from janusq.tools.ray_func import map
-import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 import networkx.algorithms.approximation.maxcut as maxcut
@@ -24,6 +22,9 @@ def downsample_statuscnt(statscnt: tuple[np.ndarray, np.ndarray], qubits: list) 
 
 
 def construct_cpd(args: tuple[int, list[int]], bench_results: tuple[np.ndarray, tuple[np.ndarray, np.ndarray]]):
+    """
+    Construct a conditional probability distribution (CPD) based on the provided arguments and benchmark results.
+    """
     qubit, related_qubits = args
 
     data = np.zeros(shape=(3, 3**len(related_qubits)))
@@ -101,13 +102,26 @@ def construct_cpd(args: tuple[int, list[int]], bench_results: tuple[np.ndarray, 
 
 
 def construct_bayesian_network(bench_results, n_qubits, groups, multi_process=True):
-    qubit_to_group = {}
+    """
+    Construct a Bayesian network based on the provided benchmark results, number of qubits, and groups.
+
+    Args:
+        bench_results: Benchmark results.
+        n_qubits (int): Number of qubits in the system.
+        groups (list[list[int]]): List of qubit groups.
+        multi_process (bool): Whether to use multiple processes for CPD construction (default is True).
+
+    Returns:
+        model: The constructed Bayesian network model.
+        infer: The variable elimination object for inference.
+    """
+    qubit_to_group = {}      # Create a dictionary mapping qubits to groups
     for group in groups:
         for qubit in group:
             qubit_to_group[qubit] = group
 
-    cpds = []
-    network_edges = []
+    cpds = []                
+    network_edges = []       # Initialize lists to store CPDs and network edges
 
     for qubit in range(n_qubits):
         cpds.append(TabularCPD(f"{qubit}_set", 3, [[1/3]] * 3,))
@@ -126,6 +140,18 @@ def construct_bayesian_network(bench_results, n_qubits, groups, multi_process=Tr
 
 
 def correlation_based_partation(bench_results, group_size, n_qubits, draw_grouping = False):
+    """
+    Perform correlation-based partitioning.
+
+    Args:
+        bench_results (tuple): Tuple containing benchmark results.
+        group_size (int): Size of the groups.
+        n_qubits (int): Number of qubits.
+        draw_grouping (bool, optional): Whether to draw the grouping. Default is False.
+
+    Returns:
+        list: List containing the partitions.
+    """
     error_count = np.zeros(shape=(n_qubits, 3, n_qubits, 1))
     all_count = np.zeros(shape=(n_qubits, 3, n_qubits, 1))
 
@@ -166,6 +192,15 @@ def correlation_based_partation(bench_results, group_size, n_qubits, draw_groupi
         plt.show()
 
     def partition(group):
+        """
+        Recursive function to partition a group based on correlation.
+
+        Args:
+            group (list): List of qubits forming the group.
+
+        Returns:
+            list: List containing partitions of the group.
+        """
         small_partitions = []
         for sub_group in maxcut.one_exchange(graph.subgraph(group), weight='freq_diff')[1]:
             if len(sub_group) == len(group):
@@ -240,10 +275,25 @@ def kron_basis(arr1, arr2, offest):
 
 
 class TPEngine():
-    '''
-        tensor-product engine
-    '''
+    """
+    Tensor-product engine for quantum operations.
+
+    Attributes:
+        n_qubits (int): Number of qubits.
+        group_to_M (dict): Mapping of groups to matrices.
+        group_to_invM (dict): Mapping of groups to inverse matrices.
+        groups (list): List of groups.
+        qubit_map (list): Internal order mapping to external order.
+        invqubit_map (list): Inverse mapping of qubit order.
+    """
     def __init__(self, n_qubits, group_to_M):
+        """
+        Initialize the TPEngine.
+
+        Args:
+            n_qubits (int): Number of qubits.
+            group_to_M (dict): Mapping of groups to matrices.
+        """
         self.n_qubits = n_qubits
         self.group_to_M = group_to_M
 
@@ -263,7 +313,17 @@ class TPEngine():
             self.invqubit_map[old_pos] = real_pos
 
     def run(self, statscnts: dict, threshold: float = None, group_to_invM=None):
-        '''Assuming there are no overlapping qubits between groups'''
+        """
+        Run the tensor-product engine to mitigate errors in the provided statistics counts.
+
+        Args:
+            statscnts (dict): Dictionary containing the statistics counts.
+            threshold (float, optional): Threshold for considering counts. Defaults to None.
+            group_to_invM (dict, optional): Mapping of groups to inverse matrices. Defaults to None.
+
+        Returns:
+            dict: Mitigated error probabilities.
+        """
         statscnts = permute(statscnts, self.qubit_map)
 
         if group_to_invM is None:
@@ -333,11 +393,26 @@ class TPEngine():
 
 
 class Iteration():
-    def __init__(self, n_qubits, threshold = 1e-3):   #threshold=1e-10
+    def __init__(self, n_qubits, threshold = 1e-3):   
+        """
+        Initialize an Iteration object.
+
+        Args:
+            n_qubits (int): Number of qubits.
+            threshold (float, optional): Threshold value. Defaults to 1e-3.
+        """
         self.n_qubits = n_qubits
         self.threshold = threshold
 
     def init(self, bench_results, groups: list[list[int]], multi_process: bool = False):
+        """
+        Initialize the Iteration object.
+
+        Args:
+            bench_results (tuple): Tuple containing benchmark results.
+            groups (list[list[int]]): List of groups of qubits.
+            multi_process (bool, optional): Whether to use multi-process. Defaults to False.
+        """
         self.bayesian_network_model, self.bayesian_infer_model = construct_bayesian_network(
             bench_results, self.n_qubits, groups, multi_process=multi_process)
         self.groups = [
@@ -419,6 +494,15 @@ class Iteration():
 
 class Mitigator():
     def __init__(self, n_qubits, n_iters=2, threshold=8e-4):
+        """
+        Initialization function to set the parameters for the mitigator.
+
+        Parameters:
+        - n_qubits: int, the number of qubits
+        - n_iters: int, the number of iterations (default is 2)
+        - threshold: float, the threshold value (default is 8e-4)
+        """
+    
         self.n_qubits = n_qubits
         self.n_iters = n_iters
         self.threshold = threshold
@@ -426,6 +510,15 @@ class Mitigator():
         self.iters: list[Iteration] = None
 
     def random_group(self, group_size):
+        """
+        Generate random groups of qubits.
+
+        Args:
+            group_size (int): The size of each group.
+
+        Returns:
+            list[list[int]]: List of randomly generated groups of qubits.
+        """
         qubits = list(range(self.n_qubits))
 
         groups = []
@@ -446,6 +539,15 @@ class Mitigator():
         return groups
 
     def eval_statuscnt(self, bench_results: tuple[np.ndarray, tuple[np.ndarray, np.ndarray]]):
+        """
+        Evaluate the status count based on the benchmark results.
+
+        Args:
+            bench_results (tuple[np.ndarray, tuple[np.ndarray, np.ndarray]]): Tuple containing benchmark results.
+
+        Returns:
+            float: Average Hamming distance between measured and real states.
+        """
         reals, statuscnt = bench_results
 
         total_dist = 0
@@ -459,6 +561,17 @@ class Mitigator():
         return total_dist/n_total
 
     def eval_partation(self, groups: list[list[int]], bench_results: tuple[np.ndarray, tuple[np.ndarray, np.ndarray]], multi_process=False) -> tuple[iter, float, float]:
+        """
+            Evaluate the partitioning based on the provided groups and benchmark results.
+
+        Args:
+            groups (list[list[int]]): List of groups of qubits.
+            bench_results (tuple[np.ndarray, tuple[np.ndarray, np.ndarray]]): Tuple containing benchmark results.
+            multi_process (bool, optional): Whether to use multi-process for mitigation. Default is False.
+
+        Returns:
+            tuple: Tuple containing the iteration object, optimized score, and optimized benchmark results.
+        """
         iter = Iteration(self.n_qubits, threshold=self.threshold)
         iter.init(bench_results, groups, multi_process=multi_process)
 
@@ -478,6 +591,19 @@ class Mitigator():
         return iter, opt_score, (reals, opt_statuscnts)
 
     def init(self, bench_results, group_size=2, partation_methods=['random', 'max-cut'], multi_process=True, draw_grouping = False):
+        """
+        Initialize the mitigator.
+
+        Parameters:
+        - bench_results: tuple, containing real bitstrings and status counts
+        - group_size: int, size of the groups (default is 2)
+        - partation_methods: list, methods for partitioning (default is ['random', 'max-cut'])
+        - multi_process: bool, whether to use multiprocessing (default is True)
+        - draw_grouping: bool, whether to draw the grouping (default is False)
+
+        Returns:
+        - float, the final score of the mitigator
+        """
         
         real_bstrs, statuscnts = bench_results
         if isinstance(statuscnts[0], dict):
@@ -522,6 +648,17 @@ class Mitigator():
         return self.scores[-1]
     
     def mitigate(self, statscnt: dict, measured_qubits = None, cho = None):
+        """
+        Mitigate measurement errors in the provided status count.
+
+        Args:
+            statscnt (dict or np.ndarray): Dictionary or numpy array representing the status count.
+            measured_qubits (list[int], optional): List of measured qubits. Default is None.
+            cho (numpy array, optional): Cho matrix for error mitigation. Default is None.
+
+        Returns:
+        dict or np.ndarray: Mitigated status count.
+        """
         if isinstance(statscnt, dict):
             statscnt = statuscnt_to_npformat(statscnt)
 

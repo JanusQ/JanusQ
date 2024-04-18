@@ -1,30 +1,29 @@
 import random
-import time
 from collections import defaultdict
-
-import ray
 from numpy import pi
-from qiskit import Aer, ClassicalRegister
+from qiskit import Aer
 from qiskit import QuantumCircuit, execute
 from qiskit.quantum_info.analysis import hellinger_fidelity
 from janusq.analysis.vectorization import RandomwalkModel, extract_device
-from janusq.data_objects.backend import Backend
-from janusq.data_objects.circuit import Circuit, Gate, Layer, SeperatableCircuit, circuit_to_qiskit, qiskit_to_circuit
+from janusq.data_objects.circuit import Circuit, Gate, Layer, SeperatableCircuit
 from janusq.data_objects.random_circuit import random_1q_layer
-
-# from qiskit_aer import import qiskit
-from qiskit_aer.noise import NoiseModel, depolarizing_error, thermal_relaxation_error
-
+from qiskit_aer.noise import NoiseModel
 from janusq.simulator.readout_error_model import ReadoutErrorModel
-
 from .gate_error_model import GateErrorModel
 import numpy as np
 
-# from upstream.randomwalk_model import extract_device, RandomwalkModel
 
 
 class NoisySimulator():
     def __init__(self, backend, gate_error_model: GateErrorModel = None, readout_error_model: ReadoutErrorModel = None):
+        """
+        Initialize the NoisySimulator with the specified backend and error models.
+
+        Args:
+            backend (str): The backend used for simulation.
+            gate_error_model (GateErrorModel): The gate error model used for simulation.
+            readout_error_model (ReadoutErrorModel): The readout error model used for simulation.
+        """
         self.gate_error_model: GateErrorModel = gate_error_model
         self.readout_error_model: ReadoutErrorModel = readout_error_model
         
@@ -44,6 +43,18 @@ class NoisySimulator():
         self.n_qubits = backend.n_qubits
 
     def obtain_circuit_fidelity(self, circuit: Circuit, n_samples=1000, circuit_reps=5):
+        """
+        Calculate the fidelity of the circuit executed on the noisy simulator.
+
+        Args:
+            circuit (Circuit): The quantum circuit to be executed.
+            n_samples (int, optional): Number of samples for circuit execution. Default is 1000.
+            circuit_reps (int, optional): Number of repetitions for circuit execution. Default is 5.
+
+        Returns:
+            float: Average fidelity of the noisy circuit execution.
+            float: Average number of error paths encountered during execution.
+        """
         n_qubits = circuit.n_qubits
         
         fidelities = []
@@ -66,6 +77,18 @@ class NoisySimulator():
         return sum(fidelities)/len(fidelities), sum(noisy_countses)/len(noisy_countses)
 
     def obtain_seperable_circuit_fidelity(self, circuit: SeperatableCircuit, n_samples=1000, circuit_reps=5):
+        """
+        Calculate the fidelity of each sub-circuit in a separable circuit executed on the noisy simulator.
+
+        Args:
+            circuit (SeperatableCircuit): The separable quantum circuit to be executed.
+            n_samples (int, optional): Number of samples for circuit execution. Default is 1000.
+            circuit_reps (int, optional): Number of repetitions for circuit execution. Default is 5.
+
+        Returns:
+            list[float]: List of average fidelities for each sub-circuit.
+            list[float]: List of average number of error paths encountered for each sub-circuit.
+        """
         n_qubits = circuit.n_qubits
 
         gate_vecs = self.vec_model.vectorize(circuit)
@@ -100,6 +123,15 @@ class NoisySimulator():
 
     @staticmethod
     def to_qiskit(circuit: Circuit) -> QuantumCircuit:
+        """
+        Convert a Circuit object to a Qiskit QuantumCircuit object.
+
+        Args:
+            circuit (Circuit): The quantum circuit to be converted.
+
+        Returns:
+            QuantumCircuit: The converted Qiskit QuantumCircuit object.
+        """
         operated_qubits = circuit.operated_qubits
 
         new_circuit = circuit.copy()
@@ -122,6 +154,15 @@ class NoisySimulator():
         return qiskit_circuit
 
     def get_noise_model(self, qubit_mapping: list[int],):
+        """
+        Get the noise model for circuit execution.
+
+        Args:
+            qubit_mapping (list[int]): A mapping of qubits in the circuit to qubits on the backend.
+
+        Returns:
+            NoiseModel: The noise model for circuit execution.
+        """
         noise_model = NoiseModel()
         
         if self.gate_error_model is not None:
@@ -133,6 +174,19 @@ class NoisySimulator():
         return noise_model
 
     def execute(self, circuit: Circuit, n_samples=2000, gate_vecs: np.ndarray = None, get_n_error_paths = False) -> dict[str, int]:
+        """
+        Execute a quantum circuit with noise.
+
+        Args:
+            circuit (Circuit): The quantum circuit to be executed.
+            n_samples (int, optional): Number of samples for circuit execution. Default is 2000.
+            gate_vecs (np.ndarray, optional): Gate vectors for the circuit. Default is None.
+            get_n_error_paths (bool, optional): Flag indicating whether to return the number of error paths. Default is False.
+
+        Returns:
+            dict[str, int]: Dictionary containing the counts of different measurement outcomes.
+            int: Number of error paths encountered during execution (if get_n_error_paths is True).
+        """
         circuit, n_error_paths = self._inject_context_error(circuit, gate_vecs)
         noise_model = self.get_noise_model(circuit.operated_qubits)
         result = execute(self.to_qiskit(circuit), self.qasm_simulator,
