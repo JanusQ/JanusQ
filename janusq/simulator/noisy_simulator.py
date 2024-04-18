@@ -1,3 +1,13 @@
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 03:33:02
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-18 08:14:13
+FilePath: /JanusQ/janusq/simulator/noisy_simulator.py
+Description: 
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
 import random
 from collections import defaultdict
 from numpy import pi
@@ -196,10 +206,21 @@ class NoisySimulator():
         else:
             return result.result().get_counts()
 
+    
     def execute_noise_free(self, circuit: Circuit, n_samples=2000) -> dict[str, int]:
+        '''
+        description: call qiskit simulator to execute without noise
+
+        '''
         return execute(self.to_qiskit(circuit), self.qasm_simulator, shots=n_samples,).result().get_counts()
 
+
+
+
     def _inject_context_error(self, circuit: Circuit, gate_vecs: np.ndarray = None) -> tuple[Circuit, int]:
+        '''
+        description: inject spacial and tempory error when a gete has a path in error model
+        '''
         if self.gate_error_model is None:
             return circuit, 0
         

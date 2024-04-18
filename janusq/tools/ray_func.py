@@ -1,3 +1,13 @@
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 06:07:18
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-18 08:38:25
+FilePath: /JanusQ/janusq/tools/ray_func.py
+Description: 
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
 from functools import reduce
 import inspect
 # from collections import Iterable
@@ -15,7 +25,15 @@ import multiprocessing
 
 DEFAUKT_N_PROCESS = multiprocessing.cpu_count() - 3
 
-def map(func, data, multi_process = False, n_process = None, show_progress = False, **kwargs): 
+def map(func, data, multi_process:bool = False, n_process:int = None, show_progress:bool = False, **kwargs): 
+    '''
+    description: dispacth tasks to sub-process
+    param {*} func: function of task 
+    param {list} data: the task need to be seprate
+    param {bool} multi_process: weather to enable multi-process
+    param {int} n_process: the number of sub-process
+    param {bool} show_progress: weather to print log
+    '''
 
     if multi_process:
         if n_process is None:

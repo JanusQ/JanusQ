@@ -29,9 +29,12 @@ docker pull jxhhhh:janusq:latest
   - bug identification: identify the potential bugs in the quantum algorithm implementation.
     - 
 - JanusFEM
-  - readout calibration
+  - benchmarking.py. Generate a circuit for measuring calibration matrices.
+  - mitigation.py. Implement iterative calibration, which includes quantifying interactions between qubits and constructing Bayesian networks.
+  - tools.py. Implement data format conversion.
 - HyQSAT
-  - solve sat domain problem
+  - hyqsat/common: This dir stores common functions about cnf files, such as readCNF.
+  - hyqsat/solveSatBy**.py: The main python function; use to solve sat problem.
 - time crystal
 
 

@@ -5,7 +5,6 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import Instruction
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from functools import lru_cache, reduce
-import numpy as np
 
 
 class Gate(dict):

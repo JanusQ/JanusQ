@@ -6,6 +6,15 @@ from . import hamiltonian_simulation, vqc, ising, qft, qknn, qsvm, grover,  ghz
 
 
 def get_data(id, qiskit_circuit: QuantumCircuit, mirror, backend: Backend, should_transpile=True, unitary = False):
+    '''
+    description: 
+    param {str} id: algorithm name 
+    param {QuantumCircuit} qiskit_circuit: algorithm circuit 
+    param {bool} mirror: Whether to add the reverse circuit of the circuit to the original circuit
+    param {Backend} backend: algorithm transpile to fit backend
+    param {bool} should_transpile: weather to transpile the algorithm circuit
+    param {bool} unitary: weather to return algorithm unitary
+    '''
     new_qiskit_circuit = QuantumCircuit(qiskit_circuit.num_qubits)
     for instruction in qiskit_circuit:
         if instruction.operation.name in ('id',):

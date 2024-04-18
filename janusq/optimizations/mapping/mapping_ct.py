@@ -1,13 +1,15 @@
-import copy
-import logging
-import pickle
-from collections import defaultdict
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 06:05:51
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-18 09:03:13
+FilePath: /JanusQ/janusq/optimizations/mapping/mapping_ct.py
+Description: 
 
-import matplotlib.pyplot as plt
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
+import logging
 import numpy as np
-import ray
-from qiskit.converters import circuit_to_dag, dag_to_circuit
-from qiskit.transpiler.passes import CrosstalkAdaptiveSchedule
 from janusq.analysis.fidelity_prediction import FidelityModel
 from janusq.data_objects.backend import Backend
 
@@ -20,6 +22,12 @@ class Mapper():
         self.fidelity_model = fidelity_model
 
     def run(self, circuit: Circuit, backend: Backend, return_candidates = False) -> Circuit:
+        '''
+        description: 
+        param {Circuit} circuit: circuit need to optimize
+        param {Backend} backend: mapper optimize run base on specific backend 
+        param {bool} return_candidates: weather to return candidates
+        '''
         qiskit_circuit = circuit.to_qiskit()
         
         transpile_results = [

@@ -4,6 +4,7 @@ import os
 import subprocess
 import inspect
 import logging
+import json
 logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 current_dir = os.getcwd()
@@ -30,14 +31,14 @@ def match_result(res, cur):
         res["conflict literals"] = int(re.findall(r'[0-9]+', cur)[0])
     elif cur.startswith("actual CPU time"):
         res["actual CPU time"] = float(re.findall(r'[0-9]+\.*[0-9]*', cur)[0])
-    elif cur.startswith("this problem time"):
-        res["this problem time"] = float(re.findall(r'[0-9]+\.*[0-9]*', cur)[0])   
+    elif cur.startswith("solving time"):
+        res["solving time"] = float(re.findall(r'[0-9]+\.*[0-9]*', cur)[0])   
     elif cur.startswith("annealing time"):
         res["annealing time"] = float(re.findall(r'[0-9]+\.*[0-9]*', cur)[0])     
     elif cur.startswith("quantum count"):
         res["quantum count"] = int(re.findall(r'[0-9]+', cur)[0])  
-    elif cur.startswith("simulate time"):
-        res["simulate time"] = float(re.findall(r'[0-9]+\.*[0-9]*', cur)[0])   
+    elif cur.startswith("simulation time"):
+        res["simulation time"] = float(re.findall(r'[0-9]+\.*[0-9]*', cur)[0])   
     elif cur.startswith("quantum success number"):
         res["quantum success number"] = int(re.findall(r'[0-9]+', cur)[0])
     elif cur.startswith("quantum conflict number"):
@@ -53,13 +54,23 @@ def match_result(res, cur):
     elif cur.startswith("UNSAT"):
         res["isSat"] = False
 
-def solve_by_minisat(cnf_file, result_dir="", verb=1, cpu_lim=0, mem_lim=0, strictp=False):
+def solve_by_minisat(cnf_file, save=False, result_dir=".", verb=1, cpu_lim=0, mem_lim=0, strictp=False):
+    '''
+    description: using minisat method to solve sat domain problem.
+    param {str} cnf_file: input a cnf file, which needs to be solve.
+    param {bool} save: weather save result in result dir.
+    param {str} result_dir: save result in result dir.
+    param {bool} verb: weather print log.
+    param {int} cpu_lim: cpu limit(core).
+    param {int} mem_lim: memory limit(MB).
+    param {bool} strictp: weather strict.
+    '''
     if verb:
         verb = 1
     else:
         verb = 0
     res = {}
-    process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), os.path.join(current_dir, cnf_file), result_dir, str(verb), str(cpu_lim),  str(mem_lim), str(strictp), "minisat", "null"], stdout=subprocess.PIPE, text=True)
+    process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), os.path.join(current_dir, cnf_file), result_dir, '1', str(cpu_lim),  str(mem_lim), str(strictp), "minisat", "null"], stdout=subprocess.PIPE, text=True)
     
     while True:
         output = process.stdout.readline()
@@ -68,14 +79,27 @@ def solve_by_minisat(cnf_file, result_dir="", verb=1, cpu_lim=0, mem_lim=0, stri
         if output:
             cur = output.strip()
             match_result(res, cur)
-            logging.info(cur)
+            if verb:
+                logging.info(cur)
+    with open(f'{result_dir}/cnf_file_result.txt', mode='w') as f:
+        json.dump(res, f)
     return res
-def solve_by_janusct(cnf_file, result_dir="1",verb=True, cpu_lim=0, mem_lim=0, strictp=False):
+def solve_by_janusct(cnf_file, save=False, result_dir=".",verb=True, cpu_lim=0, mem_lim=0, strictp=False):
+    '''
+    description: using janusct method to solve sat domain problem.
+    param {str} cnf_file: input a cnf file, which needs to be solve.
+    param {bool} save: weather save result in result dir.
+    param {str} result_dir: save result in result dir.
+    param {bool} verb: weather print log.
+    param {int} cpu_lim: cpu limit(core).
+    param {int} mem_lim: memory limit(MB).
+    param {bool} strictp: weather strict.
+    '''
     if verb:
         verb = 1
     else:
         verb = 0
-    process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), os.path.join(current_dir, cnf_file), result_dir, str(verb), str(cpu_lim),  str(mem_lim), str(strictp), "quantum", os.path.join(os.path.dirname(inspect.getfile(recongnize)), 'python/')], stdout=subprocess.PIPE, text=True)
+    process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), os.path.join(current_dir, cnf_file), result_dir, '1', str(cpu_lim),  str(mem_lim), str(strictp), "quantum", os.path.join(os.path.dirname(inspect.getfile(recongnize)), 'python/')], stdout=subprocess.PIPE, text=True)
     res = {}
     while True:
         output = process.stdout.readline()
@@ -84,6 +108,9 @@ def solve_by_janusct(cnf_file, result_dir="1",verb=True, cpu_lim=0, mem_lim=0, s
         if output:
             cur = output.strip()
             match_result(res, cur)
-            logging.info(cur)
+            if verb:
+                logging.info(cur)
+    with open(f'{result_dir}/cnf_file_result.txt', mode='w') as f:
+        json.dump(res, f)
     return res
 
