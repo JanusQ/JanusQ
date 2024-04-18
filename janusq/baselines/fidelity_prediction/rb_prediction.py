@@ -1,11 +1,16 @@
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 03:33:02
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-18 08:49:13
+FilePath: /JanusQ/janusq/baselines/fidelity_prediction/rb_prediction.py
+Description: 
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
 # Import general libraries (needed for functions)
 import numpy as np
 # Import the RB Functions
-import sys
-import os
-from pathlib import Path
-# sys.path.append(str(Path(os.getcwd())))
-
 import qiskit.ignis.verification.randomized_benchmarking as rb
 
 from qiskit import execute, transpile, Aer
@@ -16,7 +21,12 @@ from janusq.tools.ray_func import wait, map
 
 class RBModel():
     
-    def __init__(self, simulator: NoisySimulator, multi_process = True):
+    def __init__(self, simulator: NoisySimulator, multi_process:bool = True):
+        '''
+        description: run rb benchmark to estimate rb fidelity
+        param {NoisySimulator} simulator: simultor with noise
+        param {bool} multi_process: weather to enable multi-process
+        '''
         backend = simulator.vec_model.backend
         qubits = backend.involvod_qubits
         couplers = list(backend.coupling_map)
@@ -30,8 +40,14 @@ class RBModel():
         self.qubit_errors =  [error['u3'] for error in qubit_errors]
         self.coupler_errors = coupler_errors
 
-
+    
+    
     def predict_circuit_fidelity(self, circuit: Circuit):
+        '''
+        description: get run fidelity with single qubit error and coupler error from simulation
+        param {Circuit} circuit: target circuit 
+        return {float} rb fidelity result
+        '''
         fidelity = 1
         for layer in circuit:
             for gate in layer:
@@ -44,7 +60,14 @@ class RBModel():
     
     
     @staticmethod
-    def get_rb_fidelity(circuit, single_average_error_rb, couple_average_error_rb):
+    def get_rb_fidelity(circuit: Circuit, single_average_error_rb: dict, couple_average_error_rb: dict):
+        '''
+        description: get run fidelity with given single qubit error and coupler error
+        param {Circuit} circuit: target circuit 
+        param {dict} single_average_error_rb: single qubit error measure in real world
+        param {dict} couple_average_error_rb: coupler error measure in real world
+        return {float} rb fidelity result
+        '''
         fidelity = 1
         for gate in circuit.gates:
             from  janusq.analysis.vectorization import extract_device
@@ -71,6 +94,14 @@ class RBModel():
 
 
 def run_rb(simulator: NoisySimulator, rb_pattern, rb_circs, xdata, target_qubits):
+    '''
+    description: run rb benchmark and get simulate rb error
+    param {NoisySimulator} simulator: simulate with noise
+    param {*} rb_pattern: targe qubit
+    param {*} rb_circs: benchmark circuit
+    param {*} xdata: benchmark circuit
+    param {*} target_qubits: targe qubit
+    '''
     # if upstream_model is not None:
     #     assert upstream_model.backend == backend
     backend = simulator.backend
@@ -122,7 +153,13 @@ def run_rb(simulator: NoisySimulator, rb_pattern, rb_circs, xdata, target_qubits
     epc = rb_fit.fit[0]['epc']
     return gpc, epc
 
+
 def get_error_1q(target_qubit, simulator, length_range = [20, 1500]):
+    '''
+    description: get all single qubit rb error
+    param {*} target_qubit: target single qubit
+    param {*} simulator: simulator with noise
+    '''
     rb_pattern = [[target_qubit]]
     target_qubits = [target_qubit]
     rb_circs, xdata = rb.randomized_benchmarking_seq(
@@ -139,6 +176,12 @@ def get_error_1q(target_qubit, simulator, length_range = [20, 1500]):
 
 
 def get_error_2q(target_qubits, error_1qs,  simulator, length_range = [20, 600]):
+    '''
+    description: get all coupler rb error
+    param {*} target_qubits: target coupler
+    param {*} error_1qs: single qubit rb error
+    param {*} simulator: simulator with noise
+    '''
     error_1qs = [error_1qs[qubit] for qubit in target_qubits]
     assert len(target_qubits) == 2  and len(error_1qs) == 2
 

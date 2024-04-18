@@ -1,16 +1,20 @@
-import random
-
 from qiskit import QuantumCircuit, transpile, QuantumRegister
 from qiskit.circuit import Qubit
-from qiskit.circuit.random import random_circuit
-
 from janusq.data_objects.backend import Backend
 from janusq.data_objects.circuit import Circuit, qiskit_to_circuit
-
-from . import hamiltonian_simulation, vqc, ising, qft, qknn, qsvm, swap, vqe, QAOA_maxcut, grover, deutsch_jozsa, multiplier, qec_5_x, qnn, qugan, simon, square_root, ghz
+from . import hamiltonian_simulation, vqc, ising, qft, qknn, qsvm, grover,  ghz
 
 
 def get_data(id, qiskit_circuit: QuantumCircuit, mirror, backend: Backend, should_transpile=True, unitary = False):
+    '''
+    description: 
+    param {str} id: algorithm name 
+    param {QuantumCircuit} qiskit_circuit: algorithm circuit 
+    param {bool} mirror: Whether to add the reverse circuit of the circuit to the original circuit
+    param {Backend} backend: algorithm transpile to fit backend
+    param {bool} should_transpile: weather to transpile the algorithm circuit
+    param {bool} unitary: weather to return algorithm unitary
+    '''
     new_qiskit_circuit = QuantumCircuit(qiskit_circuit.num_qubits)
     for instruction in qiskit_circuit:
         if instruction.operation.name in ('id',):
@@ -38,10 +42,10 @@ def get_data(id, qiskit_circuit: QuantumCircuit, mirror, backend: Backend, shoul
         
     if unitary:
         from qiskit import Aer, execute
-        # 使用 Aer 的 unitary_simulator
+        # Using the unitary_simulator of Aer
         simulator = Aer.get_backend('unitary_simulator')
 
-        # 执行量子电路并获取酉矩阵
+        # Execute the quantum circuit and obtain the unitary matrix
         result = execute(qiskit_circuit, simulator).result()
         unitary = result.get_unitary(qiskit_circuit)
         return unitary.data
@@ -52,11 +56,33 @@ def get_data(id, qiskit_circuit: QuantumCircuit, mirror, backend: Backend, shoul
 
 
 def get_algorithm_circuits(n_qubits, backend: Backend, algs = ['qft', 'hs', 'ising', 'qknn', 'qsvm', 'vqc', 'ghz', 'grover'], unitary = False) -> list[Circuit]:
+    """
+    Generate quantum circuits for various algorithms.
+
+    Parameters
+    ----------
+    n_qubits : int
+        Number of qubits in the circuits to be generated.
+    backend : Backend
+        Backend object representing the quantum hardware or simulator.
+    algs : list of str, optional
+        List of algorithm names for which circuits are to be generated. Default is ['qft', 'hs', 'ising', 'qknn', 'qsvm', 'vqc', 'ghz', 'grover'].
+    unitary : bool, optional
+        Flag indicating whether to generate unitary circuits. Default is False.
+
+    Returns
+    -------
+    circuits : list of Circuit
+        List containing the generated quantum circuits for the specified algorithms.
+
+    """
+    
     circuits = []
-    mirror = False
+    mirror = False         # Set mirror to False by default
 
     kwargs = {'mirror': mirror, 'backend': backend, 'should_transpile': True, "unitary": unitary}
-    
+
+    # Generate circuits for each specified algorithm
     if 'qft' in algs:
         circuits.append(get_data(f'qft_{n_qubits}', qft.get_circuit(n_qubits), **kwargs))
     if 'hs' in algs:    
@@ -78,6 +104,18 @@ def get_algorithm_circuits(n_qubits, backend: Backend, algs = ['qft', 'hs', 'isi
 
 
 def ibu_response_matrix(n_qubits, backend: Backend,measuer_bit,i) -> list[Circuit]:
+    """
+    Generate circuits for IBU response matrix.
+
+    Args:
+        n_qubits (int): Number of qubits in the circuit.
+        backend (Backend): The backend used for simulation.
+        measuer_bit (int): The qubit index for measurement.
+        i (int): Index parameter.
+
+    Returns:
+        list[Circuit]: List of circuits for IBU response matrix.
+    """
 
     circuits = []
     mirror = False

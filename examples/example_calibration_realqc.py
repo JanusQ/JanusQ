@@ -57,5 +57,6 @@ outout_ideal = {'1'*n_qubits:0.5,'0'*n_qubits:0.5}
 output_fem = mitigator.mitigate(ghz_output[0],[i for i in range(n_qubits)], cho = 1 )
 output_fem = npformat_to_statuscnt(output_fem)
 
+print("Raw fidelity: ",hellinger_fidelity(outout_ideal,ghz_output[0]))
 print("Janus-FEM fidelity: ",hellinger_fidelity(outout_ideal,output_fem))
 

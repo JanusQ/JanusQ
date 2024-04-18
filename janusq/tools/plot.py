@@ -1,3 +1,13 @@
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 03:33:02
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-18 07:49:26
+FilePath: /JanusQ/janusq/tools/plot.py
+Description: 
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
 from matplotlib import cm
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
@@ -6,6 +16,10 @@ import random
 
 
 def plot_scaater(reals, predicts, durations, title = ''):
+    '''
+    description: plot scaater figure. the x-axis are real fidelities and the y-axis are predict fidelities.the coler of points are normalized durations
+
+    '''
     par = np.polyfit(reals, predicts, 1, full=True)
     slope=par[0][0]
     intercept=par[0][1]

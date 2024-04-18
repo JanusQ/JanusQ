@@ -22,7 +22,12 @@ class GateErrorModel():
 
     @staticmethod
     def random_model(backend: Backend, fs_1q_range = [0.99, 1], fs_2q_range = [0.98, 0.995], T1_range = [1e8, 1e10], T2_range= [1e7, 1e8], high_error_paths = []):
+        '''
+        description: experimentally generate single qubits and two qubit error and T1 and T2 
 
+        '''
+        
+    
         n_qubits = backend.n_qubits
         
         fs_1q = np.random.uniform(fs_1q_range[0], fs_1q_range[1], (n_qubits))

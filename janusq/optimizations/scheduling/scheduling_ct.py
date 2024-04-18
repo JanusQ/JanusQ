@@ -1,31 +1,35 @@
-import copy
-import pickle
-from collections import defaultdict
-import random
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 06:06:07
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-18 09:07:26
+FilePath: /JanusQ/janusq/optimizations/scheduling/scheduling_ct.py
+Description: 
 
-import matplotlib.pyplot as plt
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
+import copy
+import random
 import numpy as np
-import ray
-from qiskit.converters import circuit_to_dag, dag_to_circuit
-from qiskit.transpiler.passes import CrosstalkAdaptiveSchedule
 from janusq.analysis.fidelity_prediction import FidelityModel
 
 from janusq.data_objects.circuit import Circuit
 import time
 
 
-'''TODO: 整一个统一的方法，用树搜索加fidelity model和constaint based 模型进行mapping 和 scheduling'''
 
 
-'''
-    使用local search
-'''
 class Scheduler():
     def __init__(self, fidelity_model: FidelityModel) -> None:
         self.candidates = []
         self.fidelity_model = fidelity_model
 
     def run(self, target_circuit: Circuit, timeout = 60):
+        '''
+        description: use method of local search to optimize circuit
+        param {Circuit} target_circuit: target_circuit
+        param {int} timeout: break if out of time
+        '''
         # 采用local search的方式
         
         # for 10个最好的candidate的

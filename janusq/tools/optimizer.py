@@ -1,5 +1,4 @@
 import logging
-import optax
 import jax.numpy as jnp
 import time
 

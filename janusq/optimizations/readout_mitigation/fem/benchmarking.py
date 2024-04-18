@@ -1,17 +1,12 @@
-'''生成用于测量M的电路'''
+"Generate a circuit for measuring M"
 import logging
 import random
 import numpy as np
 from qiskit import QuantumCircuit
-
 from janusq.data_objects.backend import Backend
 from janusq.data_objects.circuit import Circuit
-
-from janusq.optimizations.readout_mitigation.fem.tools import all_bitstrings, decimal, expand, statuscnt_to_npformat
+from janusq.optimizations.readout_mitigation.fem.tools import all_bitstrings, decimal, statuscnt_to_npformat
 from janusq.tools.ray_func import map
-
-from janusq.simulator.noisy_simulator import NoisySimulator
-from janusq.simulator.readout_error_model import ReadoutErrorModel
 
 def gen_benchmarking_circuit(real: np.ndarray) -> Circuit:              
     measured_qubits = [
@@ -35,17 +30,29 @@ def gen_benchmarking_circuit(real: np.ndarray) -> Circuit:
                  
 class EnumeratedProtocol():
     def __init__(self, n_qubits):
+        """
+        Initialization function to set the number of qubits.
+        
+        Parameters:
+        - n_qubits: int, the number of qubits
+        """
         self.n_qubits = n_qubits
         
     def gen_circuits(self) -> tuple[list[str], list[QuantumCircuit]]:
+        """
+        Generate test circuits and corresponding real values list.
+        
+        Returns:
+        - tuple[list[str], list[QuantumCircuit]]: a tuple containing the list of real values and the list of test circuits
+        """
         circuits = []
         
         reals = []
         for real in all_bitstrings(self.n_qubits, base = 3):
-            if all(real ==  2): continue  # 没有测量
+            if all(real ==  2): continue  # No measurement
             
 
-            real_rev = real[::-1]
+            real_rev = real[::-1]   # Reverse the real values for circuit generation
             circuit = gen_benchmarking_circuit(real_rev)
             circuits.append(circuit)
             
@@ -55,17 +62,23 @@ class EnumeratedProtocol():
 
 
 
-'''TODO: 还跑不了'''
 class IterativeSamplingProtocol():
     def __init__(self, backend: Backend, hyper = 1, n_samples_iter = 1, threshold = 1e-3):
-        '''TODO: hyper是啥'''
+        """
+        Initialize the Iterative Sampling Protocol.
+
+        Parameters:
+        - backend: Backend, the quantum backend
+        - hyper: int, hyperparameter (default is 1)
+        - n_samples_iter: int, number of samples per iteration (default is 1)
+        - threshold: float, threshold value (default is 1e-3)
+        """
         self.backend = backend
         self.n_qubits = backend.n_qubits
         self.hyper = hyper
         self.n_samples_iter = n_samples_iter
         self.threshold = threshold
         self.cnt = self.hyper * self.n_qubits
-
 
         self.benchmarking_results: list[dict] = None
         
@@ -76,6 +89,17 @@ class IterativeSamplingProtocol():
     def all_results(self): return self.ideals, self.all_results
     
     def get_iter_protocol_results(self, machine_data, cnt, filter = None ):
+        """
+        Get iteration protocol results based on the provided machine data.
+
+        Args:
+            machine_data (list[tuple]): List of tuples containing real bitstrings and status counts.
+            cnt (int): The number of results to retrieve.
+            filter (tuple, optional): Filter for selecting specific bitstrings. Default is None.
+
+        Returns:
+            tuple: Tuple containing iteration results and updated machine data.
+        """
         
         if filter is None:
             iter_res = machine_data[:cnt]
@@ -94,6 +118,17 @@ class IterativeSamplingProtocol():
         return iter_res, machine_data
 
     def gen_random_circuits(self, cnt, bitstring_dataset: list,  filter = None)-> tuple[np.ndarray, Circuit]:
+        """
+        Generate random circuits and corresponding real bitstrings.
+
+        Args:
+            cnt (int): The number of circuits to generate.
+            bitstring_dataset (list): List of existing bitstrings.
+            filter (tuple, optional): Filter for selecting specific bitstrings. Default is None.
+
+        Returns:
+            tuple: Tuple containing generated real bitstrings and circuits.
+        """
         n_qubits = self.n_qubits
             
         reals, circuits = [], []
@@ -109,7 +144,7 @@ class IterativeSamplingProtocol():
             bitstring = '0' * (n_qubits - len(bitstring)) + bitstring
             
             if bitstring == '2' * self.n_qubits or bitstring in bitstring_dataset:
-                continue  # 没有测量
+                continue  
             if filter is not None:
                 if bitstring[filter[0]] != filter[2] or bitstring[filter[1]] != filter[3]:
                     continue
@@ -135,93 +170,19 @@ class IterativeSamplingProtocol():
             circuits.append(circuit)        
         
         return np.array(reals, dtype=np.int8), circuits
-    
 
-
-    # def gen_circuits(self):
-    #     n_qubits = self.n_qubits
-    #     threshold = self.threshold
-    #     n_samples_iter = self.n_samples_iter
-
-    #     bitstring_dataset =  []
-        
-    #     qubit_errors = np.zeros(shape=n_qubits)
-    #     qubit_count = 0
-    #     states_error = np.zeros((n_qubits, n_qubits, 2, 3))
-    #     states_count = np.zeros((n_qubits, n_qubits, 2, 3))
-    #     states_datasize = np.zeros((n_qubits, n_qubits, 2, 3))
-
-    #     filter = None
-        
-    #     kth_max = 0
-    #     while True:
-    #         reals, protocol_circuits = self.gen_random_circuits(self.cnt, bitstring_dataset, filter = filter)
-            
-    #         if len(reals) == 0:
-    #             break
-            
-    #         # yield reals, protocol_circuits
-    #         yield  protocol_circuits
-            
-    #         # benchmarking_statuscntss = self.benchmarking_results
-
-
-    #         benchmarking_statuscntss = [
-    #             self.simulator.execute(circuit, 1000)
-    #             for circuit in protocol_circuits
-    #         ]
-
-
-    #         format_benchmarking_results = []
-    #         for (bitstrings, probs), real in zip(self.benchmarking_results, reals):
-    #             measured_qubits = [qubit for qubit in range(n_qubits) if real[qubit] != 2]
-    #             bitstrings = np.array([expand(bitstring, measured_qubits, n_qubits) for bitstring in bitstrings], dtype=np.int8)
-    #             format_benchmarking_results.append((bitstrings, probs))
-            
-    #         benchmarking_statuscntss = format_benchmarking_results
-            
-    #         self.executed_statuscntss += benchmarking_statuscntss
-    #         if len(self.executed_reals) == 0:
-    #             self.executed_reals = reals
-    #         else:
-    #             self.executed_reals = np.concatenate([self.executed_reals, reals], dtype=np.int8)
-    #         # print(len(self.executed_statuscntss), len(self.executed_reals))
-            
-    #         for real, (meas_np, cnt_np) in zip(reals, benchmarking_statuscntss):
-    #             qubit_count += np.sum(cnt_np)  # 固定值
-                
-    #             for q0 in range(n_qubits):
-    #                 if real[q0] == 2:
-    #                      continue
-    #                 for q1 in range(n_qubits):
-    #                     states_count[q0][q1][real[q0]][real[q1]] += qubit_count
-    #                     states_datasize[q0][q1][real[q0]][real[q1]] += 1
-
-    #                 error_index = meas_np[:,q0] != real[q0]
-    #                 error_cnt_np = cnt_np[error_index]
-                    
-    #                 total_error_cnt_np = np.sum(error_cnt_np)
-    #                 for q1 in range(n_qubits):
-    #                     states_error[q0][q1][real[q0]][real[q1]] += total_error_cnt_np
-                    
-                
-    #         iter_qubit_errors = qubit_errors / qubit_count               
-    #         iter_states_error = states_error / states_count
-
-    #         for qubit in range(n_qubits):
-    #             iter_states_error[qubit] -= iter_qubit_errors[qubit]
-                
-    #         eq6 = np.abs(iter_states_error)/states_datasize
-                
-    #         if np.nanmax(eq6) < threshold:
-    #             break
-            
-    #         nan_count = np.sum(np.isnan(eq6))
-    #         filter = np.argsort(eq6, axis = None )[-1-nan_count-kth_max]
-    #         filter = np.unravel_index(filter, eq6.shape)
 
 
     def get_data(self, machine_data):
+        """
+        Process machine data to obtain protocol results.
+
+        Parameters:
+        - machine_data: array, data from the machine
+
+        Returns:
+        - list, protocol results dataset
+        """
 
         hyper = self.hyper
         threshold = self.threshold
@@ -249,7 +210,7 @@ class IterativeSamplingProtocol():
 
                 while len(protocol_results) == 0:
                     if len(machine_data) == 0:
-                        logging.warning(f'当 threshold = ', threshold, '被薅空了')
+                        logging.warning(f'when threshold = ', threshold, 'being drained')
                         return protocol_results_dataset
                     kth_max += 1
 
@@ -265,7 +226,7 @@ class IterativeSamplingProtocol():
             for ele in protocol_results:
                 real_bitstring, status_count  = ele
                 meas_np, cnt_np = status_count
-                qubit_count += np.sum(cnt_np)  # 固定值
+                qubit_count += np.sum(cnt_np)  # fixed value
                 
 
                 for q0 in range(n_qubits):
@@ -308,6 +269,5 @@ class IterativeSamplingProtocol():
         # ideal_ops: list[np.ndarray], execution_results: list[tuple[np.ndarray, np.ndarray]]
         self.benchmarking_results: list[tuple[np.ndarray, np.ndarray]] = map(statuscnt_to_npformat, results)
         # benchmarking_result_to_np_format(results)
-        # 可以变成完全矩阵计算
 
     

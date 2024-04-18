@@ -1,30 +1,46 @@
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 06:05:01
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-18 07:14:18
+FilePath: /JanusQ/janusq/data_objects/backend.py
+Description: this module define several kind of backends
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
 import copy
 import itertools as it
 import math
 import time
 import random
 from collections import defaultdict
-import numpy as np
 
 DEFAUT_SINGLE_QGATES = ['u']
 DEFAULT_DOUBLE_QGATES = ['cx']
 
+
 class Backend():
     '''
-    Example:
-    0-1-2
-    | | |
-    3-4-5
-    | | |
-    6-7-8
-
     topology: {0: [1, 3], 1: [0, 2, 4], 2: [1, 5], 3: [0, 4, 6], 4: [1, 3, 5, 7], 5: [2, 4, 8], 6: [3, 7], 7: [4, 6, 8], 8: [5, 7]})
     coupling_map: [[0, 1], [1, 2], [3, 4], [5, 8], [0, 3], [1, 4], [6, 7], [4, 5], [3, 6], [2, 5], [4, 7], [7, 8]]
     neigh_info: {0: [1, 3], 1: [0, 3], 2: [1], 3: [1, 4, 7], 4: [1, 3, 5, 7], 5: [1, 4, 7], 6: [7], 7: [5, 8], 8: [5, 7]})  
     '''
     
-    def __init__(self, n_qubits, topology=None, adjlist=None, coupling_map = None, basis_single_gates: list = None,
-                 basis_two_gates: list = None, single_qubit_gate_time=30, two_qubit_gate_time=60, single_qubit_gate_fidelty_range = [0.99, 1], error_model = None):
+    def __init__(self, n_qubits: int, topology: dict = None, adjlist: dict=None, coupling_map: list = None, basis_single_gates: list = None,
+                 basis_two_gates: list = None, single_qubit_gate_time: int=30, two_qubit_gate_time: int=60,):
+        '''
+        description: 
+        param {int} n_qubits: the number of qubit
+        param {dict} topology: the topology of qubits, the list of value are qubits connected with the key qubit
+        param {dict} adjlist: the topology of qubits, the list of value are qubits connected with the key qubit
+        param {list} coupling_map: the list of couplers
+        param {list} basis_single_gates: support single gates
+        param {list} basis_two_gates: support two qubit gates
+        param {int} single_qubit_gate_time: the exection time of single gate
+        param {int} two_qubit_gate_time: the exection time of two qubit gate
+        '''
+
+    
         self.n_qubits = n_qubits
         self.involvod_qubits = list(range(n_qubits))
 
@@ -116,15 +132,24 @@ class Backend():
         self.cache[n_qubit_set] = locations
         return locations
 
-    '''TODO: 拓扑结构也得相等'''
-
     def __eq__(self, other):
         return self.n_qubits == other.n_qubits
 
 
 
 class FullyConnectedBackend(Backend):
-    def __init__(self, n_qubits, **kwargs):
+    '''
+    fully connected backend, qubits are connected with other qubits
+
+    Example:
+    0-1-2
+    |___|
+
+    '''
+    def __init__(self, n_qubits:int, **kwargs):
+        '''
+        param {int} n_qubits: number of qubits
+        '''
         topology = {
             q1: [q2  for q2 in range(n_qubits) if q1 != q2]
             for q1 in range(n_qubits)
@@ -132,16 +157,24 @@ class FullyConnectedBackend(Backend):
         Backend.__init__(self, n_qubits, topology=topology, **kwargs)
         return
 
+
+
 class GridBackend(Backend):
     '''
+    Grid-like backend, qubit is organized into a grid shape
+
     Example:
-    0   1   2
-    3   4   5
-    6   7   8
+    0-1-2
+    | | |
+    3-4-5
+    | | |
+    6-7-8
     '''
-    def __init__(self, n_columns, n_rows, dist_threadhold = 100, **kwargs):
+    def __init__(self, n_columns:int, n_rows:int, dist_threadhold:int = 100, **kwargs):
         '''
-            dist_threadhold: maximum distances of neighboring qubits in the random walk
+        param {int} n_columns: number of columns
+        param {int} n_rows: number of rows
+        param {int} dist_threadhold: maximum distances of neighboring qubits in the random walk
         '''
         topology = defaultdict(list)
 
@@ -179,29 +212,42 @@ class GridBackend(Backend):
         Backend.__init__(self, n_qubits, topology = topology, adjlist = adjlist, **kwargs)
         
 
-    # def get_grid_adjlist(size, max_distance):
-    #     neigh_info = defaultdict(list)
-
-    #     for x in range(size):
-    #         for y in range(size):
-    #             qubit = x * size + y
-    #             for neigh_x in range(x - 1, x + 2):
-    #                 for neigh_y in range(y - 1, y + 2):
-    #                     if neigh_x < 0 or neigh_x >= size or neigh_y < 0 or neigh_y >= size or (
-    #                             x == neigh_x and y == neigh_y):
-    #                         continue
-    #                     if ((x - neigh_x) ** 2 + (y - neigh_y) ** 2) <= max_distance ** 2:
-    #                         neigh_qubit = neigh_x * size + neigh_y
-    #                         neigh_info[qubit].append(neigh_qubit)
-
-    #     return neigh_info
-
 class LinearBackend(Backend):
     def __init__(self, n_qubits, dist_threadhold = 100, **kwargs):
+        """
+        Initialize a linear quantum backend object.
+
+        Parameters
+        ----------
+        n_qubits : int
+            Total number of qubits in the backend.
+
+        dist_threadhold : int, optional
+            Distance threshold between qubits. Default is 100.
+
+        **kwargs : dict
+            Other parameters passed to the constructor of the parent class Backend.
+
+        Attributes
+        ----------
+        topology : dict
+            The topology of the quantum backend, representing the connectivity between qubits.
+
+        adjlist : dict
+            The adjacency list of the quantum backend, representing the connectivity of each qubit to others.
+
+        Raises
+        ------
+        ValueError
+            If dist_threadhold is not a positive integer.
+
+        """
+        # Build topology: connectivity between each qubit and its neighbors
         topology = {
             q1: [q2 for q2 in [q1-1, q1+1] if q2 >= 0 and q2 < n_qubits]
             for q1 in range(n_qubits)
         }
+        # Build adjacency list: establish connections between qubits within dist_threadhold
         adjlist = {
         q1: [
             q2 for q2 in range(n_qubits)
@@ -209,7 +255,8 @@ class LinearBackend(Backend):
         ]
         for q1 in range(n_qubits)
     }
-
+        
+        # Call the constructor of the parent class Backend and pass topology and adjlist as parameters
         Backend.__init__(self, n_qubits, topology = topology, adjlist = adjlist, **kwargs)
 
 
