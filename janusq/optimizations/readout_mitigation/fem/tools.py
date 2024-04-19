@@ -2,7 +2,7 @@
 Author: name/jxhhhh� 2071379252@qq.com
 Date: 2024-04-19 01:53:22
 LastEditors: name/jxhhhh� 2071379252@qq.com
-LastEditTime: 2024-04-19 01:54:00
+LastEditTime: 2024-04-19 02:03:26
 FilePath: /JanusQ/janusq/optimizations/readout_mitigation/fem/tools.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
@@ -84,11 +84,8 @@ def status_count_to_np_format_remote(state_cnt):
     return statuscnt_to_npformat(state_cnt)
 
 def benchmarking_result_to_np_format(protocol_results: dict, multi_process = False):
-<<<<<<< HEAD
-=======
     # Convert to the format 
     # real, [mea, count]
->>>>>>> 71db17494fcd443581e1e764fb17889be3e7ea9b
     ideals = [
         np.array(list(ideal)).astype(np.int8)
         for ideal in protocol_results.keys()

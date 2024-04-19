@@ -1,3 +1,13 @@
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 03:33:02
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-19 02:06:14
+FilePath: /JanusQ/janusq/analysis/unitary_decompostion.py
+Description: 
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
 from collections import defaultdict
 import copy
 import math
@@ -105,6 +115,11 @@ def flatten(U: np.ndarray)->np.ndarray:
 
 class U2VModel():
     def __init__(self, upstream_model: RandomwalkModel, name=None):
+        '''
+        description: turn unitary to vector candidates
+        param {RandomwalkModel} upstream_model:
+        param {str} name: model name
+        '''
         self.upstream_model = upstream_model
         self.backend = upstream_model.backend
         self.n_qubits = upstream_model.n_qubits

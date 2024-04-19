@@ -81,8 +81,9 @@ def solve_by_minisat(cnf_file, save=False, result_dir=".", verb=1, cpu_lim=0, me
             match_result(res, cur)
             if verb:
                 logging.info(cur)
-    with open(f'{result_dir}/cnf_file_result.txt', mode='w') as f:
-        json.dump(res, f)
+    if save:
+        with open(f'{result_dir}/cnf_file_result.txt', mode='w') as f:
+            json.dump(res, f)
     return res
 def solve_by_janusct(cnf_file, save=False, result_dir=".",verb=True, cpu_lim=0, mem_lim=0, strictp=False):
     '''
@@ -110,7 +111,8 @@ def solve_by_janusct(cnf_file, save=False, result_dir=".",verb=True, cpu_lim=0, 
             match_result(res, cur)
             if verb:
                 logging.info(cur)
-    with open(f'{result_dir}/cnf_file_result.txt', mode='w') as f:
-        json.dump(res, f)
+    if save:
+        with open(f'{result_dir}/cnf_file_result.txt', mode='w') as f:
+            json.dump(res, f)
     return res
 
