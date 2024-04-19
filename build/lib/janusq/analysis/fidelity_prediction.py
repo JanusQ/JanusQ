@@ -74,7 +74,7 @@ class FidelityModel():
             #     device_indices = self._obtain_gate_devices(circuit)
             #     D.append(pad_D(device_indices, jnp.int32))
             #     F.append(fidelity)
-            #     GV.append(pad_GV(vec_model.vectorize(circuit), jnp.float64))
+            #     GV.append(pad_GV(vec_model.vectorize(circuit), jnp.float32))
             
             for circuit, fidelity in zip(*dataset):
                 device_indices = self._obtain_gate_devices(circuit)
@@ -82,7 +82,7 @@ class FidelityModel():
                 D.append(jnp.array(device_indices, jnp.int32))
                 
             def vectorize(circuit, vec_model):
-                return jnp.array(vec_model.vectorize(circuit), jnp.float64)
+                return jnp.array(vec_model.vectorize(circuit), jnp.float32)
             
             GV = map(vectorize, dataset[0], multi_process, show_progress=True, vec_model = vec_model)
                 
