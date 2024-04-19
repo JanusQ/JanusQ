@@ -1,3 +1,13 @@
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-18 07:43:06
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-19 02:19:14
+FilePath: /JanusQ/janusq/simulator/gate_error_model.py
+Description: 
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
 import numpy as np
 from janusq.analysis.vectorization import RandomwalkModel
 

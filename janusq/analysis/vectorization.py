@@ -375,7 +375,7 @@ class RandomwalkModel():
                             path_index = self.path_index(device, path_id)
                             path_len = len(path_id.split('-'))//2
                             vec[int(path_index)] = self.alpha ** path_len
-                    
+            gate.vec = vec  
             vecs.append(vec)
 
         return np.array(vecs)

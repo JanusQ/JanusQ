@@ -19,11 +19,11 @@ def match_result(res, cur):
         res["conflicts"] = int(re.findall(r'[0-9]+', cur)[0])
     elif cur.startswith("conflict cost"):
         res["conflict cost"] = float(re.findall(r'[0-9]+\.*[0-9]*', cur)[0])
-    elif cur.startswith("decisions"):
+    elif cur.startswith("decisions") and not cur.startswith("decisions cost"):
         res["decisions"] = int(re.findall(r'[0-9]+', cur)[0])
     elif cur.startswith("decisions cost"):
         res["decisions cost"] = float(re.findall(r'[0-9]+\.*[0-9]*', cur)[0])
-    elif cur.startswith("propagations"):
+    elif cur.startswith("propagations") and not cur.startswith("propagations cost"):
         res["propagations"] = int(re.findall(r'[0-9]+', cur)[0])
     elif cur.startswith("propagations cost"):
         res["propagations cost"] = float(re.findall(r'[0-9]+\.*[0-9]*', cur)[0])
@@ -46,13 +46,13 @@ def match_result(res, cur):
     elif cur.startswith("quantum one time solve number"):
         res["quantum one time solve number"] = int(re.findall(r'[0-9]+', cur)[0])
     elif cur.startswith("SATISFIABLE"):
-        res["isSatisfiable"] = True
+        res["is satisfiable"] = True
     elif cur.startswith("UNSATISFIABLE"):
-        res["isSatisfiable"] = False
+        res["is satisfiable"] = False
     elif cur.startswith("SAT"):
-        res["isSat"] = True
+        res["is sat"] = True
     elif cur.startswith("UNSAT"):
-        res["isSat"] = False
+        res["is sat"] = False
 
 def solve_by_minisat(cnf_file, save=False, result_dir=".", verb=1, cpu_lim=0, mem_lim=0, strictp=False):
     '''
@@ -115,4 +115,3 @@ def solve_by_janusct(cnf_file, save=False, result_dir=".",verb=True, cpu_lim=0, 
         with open(f'{result_dir}/cnf_file_result.txt', mode='w') as f:
             json.dump(res, f)
     return res
-
