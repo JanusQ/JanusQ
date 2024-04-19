@@ -63,7 +63,7 @@ class EnumeratedProtocol():
 
 
 class IterativeSamplingProtocol():
-    def __init__(self, backend: Backend, hyper = 1, n_samples_iter = 1, threshold = 1e-3):
+    def __init__(self, backend: Backend, hyper = 1, n_samples_iter = 1, threshold = 1.3e-4):
         """
         Initialize the Iterative Sampling Protocol.
 
@@ -78,7 +78,7 @@ class IterativeSamplingProtocol():
         self.hyper = hyper
         self.n_samples_iter = n_samples_iter
         self.threshold = threshold
-        self.cnt = self.hyper * self.n_qubits
+        self.cnt = self.hyper 
 
         self.benchmarking_results: list[dict] = None
         
