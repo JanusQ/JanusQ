@@ -1,3 +1,23 @@
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 03:33:02
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-19 02:51:09
+FilePath: /JanusQ/janusq/analysis/unitary_decompostion.py
+Description: 
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 03:33:02
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-19 02:06:14
+FilePath: /JanusQ/janusq/analysis/unitary_decompostion.py
+Description: 
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
 from collections import defaultdict
 import copy
 import math
@@ -35,6 +55,12 @@ import os
 
 class PCA():
     def __init__(self, X, k=None, max_k=None, reduced_prop=None) -> None:
+        '''
+        description: reduce vector dimensions
+        param {*} X: data to reduce
+        param {*} max_k: top k max eigen value
+        param {*} reduced_prop: the propotion of demension to reduce
+        '''
         X = np.concatenate([m.reshape((-1, m.shape[-1])) for m in X], axis=0)
         X_mean = np.mean(X, axis=0)
         X_centered = X - X_mean
@@ -105,6 +131,11 @@ def flatten(U: np.ndarray)->np.ndarray:
 
 class U2VModel():
     def __init__(self, upstream_model: RandomwalkModel, name=None):
+        '''
+        description: turn unitary to vector candidates
+        param {RandomwalkModel} upstream_model:
+        param {str} name: model name
+        '''
         self.upstream_model = upstream_model
         self.backend = upstream_model.backend
         self.n_qubits = upstream_model.n_qubits
@@ -114,6 +145,11 @@ class U2VModel():
         self.U_to_vec_model = None
 
     def construct_data(self, circuits, multi_process=False):
+        '''
+        description: use circuits' vecs and its unitary construct an U2V model 
+        param {*} circuits: train dataset
+        param {bool} multi_process: weather to enable multi=process
+        '''
         n_qubits = self.n_qubits
         n_steps = self.upstream_model.n_steps
 
@@ -314,6 +350,13 @@ def circuit_to_pennylane(circuit: Circuit, params=None, offest=0):
                 # raise Exception('Unkown gate type', gate)
 
 def circuit_to_matrix(circuit: Circuit, n_qubits, params=None) -> jax.numpy.array:
+    '''
+    description: compute unitary of circuit
+    param {Circuit} circuit: target circuit
+    param {int} n_qubits: numbrer of qubits
+    param {*} params: kwargs
+    return {np.ndarray} unitary
+    '''
     if len(circuit) == 0:
         return jnp.eye(2**n_qubits)
     with qml.tape.QuantumTape() as U:
@@ -826,7 +869,18 @@ def decompose_to_gates(target_U, backend: Backend, allowed_dist=1e-5, multi_proc
     return solutions[int(np.argmin(n_gates))]
 
 
-def decompose(target_U, allowed_dist, backend: Backend, max_n_solutions=1, multi_process=True, logger_level=logging.WARNING, u2v_model  = None) -> Circuit:
+def decompose(target_U, allowed_dist, backend: Backend, max_n_solutions=1, multi_process=True, logger_level=logging.WARNING, u2v_model: U2VModel  = None) -> Circuit:
+    '''
+    description: 
+    param {np.ndarray} target_U: target unitary
+    param {float} allowed_dist: the distance allowed between target unitary and synthesis circuit
+    param {Backend} backend: backend 
+    param {*} max_n_solutions: select n candidates per iteration
+    param {*} multi_process: weather to enbale multi-process
+    param {*} logger_level: logging level
+    param {U2VModel} u2v_model: use u2vmodel tot reduce search space of candidates
+    return {Circuit}: synthesis circuit
+    '''
 
     logger = logging.getLogger(__name__)
     logger.setLevel(logger_level)

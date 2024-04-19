@@ -1,3 +1,13 @@
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 06:05:07
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-19 03:06:03
+FilePath: /JanusQ/janusq/data_objects/circuit.py
+Description: 
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
 import copy
 import logging
 import uuid
@@ -279,6 +289,11 @@ def circuit_to_qiskit(circuit: Circuit, barrier=True) -> QuantumCircuit:
 
 
 def qiskit_to_circuit(qiskit_circuit: QuantumCircuit) -> Circuit:
+    '''
+    description: convert a qiskiut circuit to our format circuit 
+    param {QuantumCircuit} qiskit_circuit:
+    return {Circuit}
+    '''
     layer_to_qiskit_instructions = _get_layered_instructions(qiskit_circuit)[0]
 
     layer_to_instructions = []
