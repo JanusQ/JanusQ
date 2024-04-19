@@ -1,17 +1,12 @@
-'''生成用于测量M的电路'''
+"Generate a circuit for measuring M"
 import logging
 import random
 import numpy as np
 from qiskit import QuantumCircuit
-
 from janusq.data_objects.backend import Backend
 from janusq.data_objects.circuit import Circuit
-
-from janusq.optimizations.readout_mitigation.fem.tools import all_bitstrings, decimal, expand, statuscnt_to_npformat
+from janusq.optimizations.readout_mitigation.fem.tools import all_bitstrings, decimal, statuscnt_to_npformat
 from janusq.tools.ray_func import map
-
-from janusq.simulator.noisy_simulator import NoisySimulator
-from janusq.simulator.readout_error_model import ReadoutErrorModel
 
 def gen_benchmarking_circuit(real: np.ndarray) -> Circuit:              
     measured_qubits = [
@@ -54,16 +49,17 @@ class EnumeratedProtocol():
         
         reals = []
         for real in all_bitstrings(self.n_qubits, base = 3):
-            if all(real ==  2): continue  # 没有测量
+            if all(real ==  2): continue  # No measurement
             
 
-            real_rev = real[::-1]
+            real_rev = real[::-1]   # Reverse the real values for circuit generation
             circuit = gen_benchmarking_circuit(real_rev)
             circuits.append(circuit)
             
             reals.append(real)
             
         return np.array(reals, dtype=np.int8), circuits
+
 
 
 class IterativeSamplingProtocol():
@@ -84,7 +80,6 @@ class IterativeSamplingProtocol():
         self.threshold = threshold
         self.cnt = self.hyper * self.n_qubits
 
-
         self.benchmarking_results: list[dict] = None
         
         self.executed_reals = []
@@ -104,7 +99,12 @@ class IterativeSamplingProtocol():
 
         Returns:
             tuple: Tuple containing iteration results and updated machine data.
+<<<<<<< HEAD
         """        
+=======
+        """
+        
+>>>>>>> 71db17494fcd443581e1e764fb17889be3e7ea9b
         if filter is None:
             iter_res = machine_data[:cnt]
             machine_data =  machine_data[cnt:]
@@ -148,7 +148,7 @@ class IterativeSamplingProtocol():
             bitstring = '0' * (n_qubits - len(bitstring)) + bitstring
             
             if bitstring == '2' * self.n_qubits or bitstring in bitstring_dataset:
-                continue  # 没有测量
+                continue  
             if filter is not None:
                 if bitstring[filter[0]] != filter[2] or bitstring[filter[1]] != filter[3]:
                     continue
@@ -174,13 +174,22 @@ class IterativeSamplingProtocol():
             circuits.append(circuit)        
         
         return np.array(reals, dtype=np.int8), circuits
-    
 
 
 
     def get_data(self, machine_data):
         """
         Process machine data to obtain protocol results.
+<<<<<<< HEAD
+=======
+
+        Parameters:
+        - machine_data: array, data from the machine
+
+        Returns:
+        - list, protocol results dataset
+        """
+>>>>>>> 71db17494fcd443581e1e764fb17889be3e7ea9b
 
         Parameters:
         - machine_data: array, data from the machine
@@ -214,7 +223,7 @@ class IterativeSamplingProtocol():
 
                 while len(protocol_results) == 0:
                     if len(machine_data) == 0:
-                        logging.warning(f'当 threshold = ', threshold, '被薅空了')
+                        logging.warning(f'when threshold = ', threshold, 'being drained')
                         return protocol_results_dataset
                     kth_max += 1
 
@@ -230,7 +239,7 @@ class IterativeSamplingProtocol():
             for ele in protocol_results:
                 real_bitstring, status_count  = ele
                 meas_np, cnt_np = status_count
-                qubit_count += np.sum(cnt_np)  # 固定值
+                qubit_count += np.sum(cnt_np)  # fixed value
                 
 
                 for q0 in range(n_qubits):
