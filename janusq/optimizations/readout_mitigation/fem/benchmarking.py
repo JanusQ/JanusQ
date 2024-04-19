@@ -99,12 +99,7 @@ class IterativeSamplingProtocol():
 
         Returns:
             tuple: Tuple containing iteration results and updated machine data.
-<<<<<<< HEAD
         """        
-=======
-        """
-        
->>>>>>> 71db17494fcd443581e1e764fb17889be3e7ea9b
         if filter is None:
             iter_res = machine_data[:cnt]
             machine_data =  machine_data[cnt:]
@@ -180,16 +175,6 @@ class IterativeSamplingProtocol():
     def get_data(self, machine_data):
         """
         Process machine data to obtain protocol results.
-<<<<<<< HEAD
-=======
-
-        Parameters:
-        - machine_data: array, data from the machine
-
-        Returns:
-        - list, protocol results dataset
-        """
->>>>>>> 71db17494fcd443581e1e764fb17889be3e7ea9b
 
         Parameters:
         - machine_data: array, data from the machine
