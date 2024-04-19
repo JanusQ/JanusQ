@@ -1,3 +1,11 @@
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 06:06:56
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-19 01:47:33
+FilePath: /JanusQ/janusq/simulator/readout_error_model.py
+Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+'''
 
 
 from janusq.data_objects.backend import Backend
@@ -7,6 +15,9 @@ from janusq.tools.saver import load, dump
 from qiskit_aer.noise import NoiseModel,  ReadoutError
 
 class ReadoutErrorModel():
+    """
+    A class representing a readout error model for quantum simulation.
+    """
     def __init__(self, backend: Backend, M_per_qubit: list[np.ndarray]):
         self.n_qubits = backend.n_qubits
         self.backend = backend
@@ -15,6 +26,15 @@ class ReadoutErrorModel():
 
     @staticmethod
     def random_model(backend: Backend):
+        """
+        Create a random readout error model for the specified backend.
+
+        Args:
+            backend (Backend): The backend for which the readout error model is created.
+
+        Returns:
+        ReadoutErrorModel: The randomly generated readout error model.
+        """
         n_qubits = backend.n_qubits
         measure_fids = np.random.random(size=(n_qubits, 2))
         measure_fids = np.abs(measure_fids) / 10 + .9

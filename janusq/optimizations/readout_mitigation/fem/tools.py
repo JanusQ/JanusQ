@@ -47,6 +47,15 @@ def all_bitstrings(n_qubits, base = 2):
 
 
 def statuscnt_to_npformat(state_cnt):
+    """
+    Convert status count dictionary to numpy array format.
+
+    Args:
+        state_cnt (dict): Dictionary representing the status count.
+
+    Returns:
+        tuple[np.ndarray, np.ndarray]: Tuple containing numpy arrays representing bitstrings and counts.
+    """
     meas_list, cnt_list = [], []
     for i, (meas, cnt) in enumerate(state_cnt.items()):
         meas = np.array(list(meas)).astype(np.int8)
@@ -58,6 +67,15 @@ def statuscnt_to_npformat(state_cnt):
     return [meas_np, cnt_np]
 
 def npformat_to_statuscnt(np_format):
+    """
+    Convert numpy array format to status count dictionary.
+
+    Args:
+        np_format (tuple[np.ndarray, np.ndarray]): Tuple containing numpy arrays representing bitstrings and counts.
+
+    Returns:
+        dict: Dictionary representing the status count.
+    """
     bstrs, counts = np_format
     status_count = {}
     for bstr, count in zip(bstrs, counts):
@@ -71,9 +89,6 @@ def status_count_to_np_format_remote(state_cnt):
     return statuscnt_to_npformat(state_cnt)
 
 def benchmarking_result_to_np_format(protocol_results: dict, multi_process = False):
-    # 转换成
-    # real, [mea, count]
-    #  的格式
     ideals = [
         np.array(list(ideal)).astype(np.int8)
         for ideal in protocol_results.keys()
@@ -113,6 +128,16 @@ def downsample_status_count(stats_count: dict, qubits: list):
     return dict(new_stats_count)
 
 def downsample(protocol_result: dict[dict], qubits:list):
+    """
+    Downsample the protocol result based on the selected qubits.
+
+    Args:
+        protocol_result (dict): Protocol result containing real bitstrings and status counts.
+        qubits (list): List of qubits to be selected.
+
+    Returns:
+        dict: Downsampled protocol result.
+    """
     new_protocol_result = {}
     for real_bitsting, status_count in protocol_result.items():
         new_real_bitsring = downsample_bitstring(real_bitsting,qubits)
