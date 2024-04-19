@@ -2,22 +2,18 @@
 Author: name/jxhhhh� 2071379252@qq.com
 Date: 2024-04-16 13:33:36
 LastEditors: name/jxhhhh� 2071379252@qq.com
-LastEditTime: 2024-04-18 09:01:00
+LastEditTime: 2024-04-19 01:52:46
 FilePath: /JanusQ/janusq/data_objects/algorithms/__init__.py
 Description: 
 
 Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
 '''
-import random
 
 from qiskit import QuantumCircuit, transpile, QuantumRegister
 from qiskit.circuit import Qubit
-from qiskit.circuit.random import random_circuit
-
 from janusq.data_objects.backend import Backend
 from janusq.data_objects.circuit import Circuit, qiskit_to_circuit
-
-from . import hamiltonian_simulation, vqc, ising, qft, qknn, qsvm, swap, vqe, QAOA_maxcut, grover, deutsch_jozsa, multiplier, qec_5_x, qnn, qugan, simon, square_root, ghz
+from . import hamiltonian_simulation, vqc, ising, qft, qknn, qsvm,  grover,  ghz
 
 
 def get_data(id, qiskit_circuit: QuantumCircuit, mirror, backend: Backend, should_transpile=True, unitary = False):
@@ -57,10 +53,9 @@ def get_data(id, qiskit_circuit: QuantumCircuit, mirror, backend: Backend, shoul
         
     if unitary:
         from qiskit import Aer, execute
-        # 使用 Aer 的 unitary_simulator
         simulator = Aer.get_backend('unitary_simulator')
 
-        # 执行量子电路并获取酉矩阵
+        # Execute quantum circuits and obtain unitary matrices
         result = execute(qiskit_circuit, simulator).result()
         unitary = result.get_unitary(qiskit_circuit)
         return unitary.data
