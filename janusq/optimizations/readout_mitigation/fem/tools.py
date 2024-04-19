@@ -84,11 +84,8 @@ def status_count_to_np_format_remote(state_cnt):
     return statuscnt_to_npformat(state_cnt)
 
 def benchmarking_result_to_np_format(protocol_results: dict, multi_process = False):
-<<<<<<< HEAD
-=======
     # Convert to the format 
     # real, [mea, count]
->>>>>>> 71db17494fcd443581e1e764fb17889be3e7ea9b
     ideals = [
         np.array(list(ideal)).astype(np.int8)
         for ideal in protocol_results.keys()
