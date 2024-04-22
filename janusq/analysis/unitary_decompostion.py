@@ -103,7 +103,7 @@ class PCA():
 
     def transform(self, X) -> jnp.array:
         reduced_matrices: jnp.array = vmap(pca_transform, in_axes=(0, None, None))(X, self.X_mean, self.V_k)
-        return reduced_matrices.astype(jnp.float64)
+        return reduced_matrices.astype(jnp.float32)
 
 
 @jax.jit
@@ -112,7 +112,7 @@ def pca_transform(m, X_mean, V_k):
     m_reduced = jnp.dot(m_centered, V_k)
     q, r = jnp.linalg.qr(m_reduced)
     q = q.reshape(q.size)
-    q = jnp.concatenate([q.imag, q.real], dtype=jnp.float64)
+    q = jnp.concatenate([q.imag, q.real], dtype=jnp.float32)
     return q
 
 

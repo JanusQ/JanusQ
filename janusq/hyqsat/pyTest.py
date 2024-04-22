@@ -94,6 +94,27 @@ def solve_by_janusct(cnf_file, save=False, result_dir=".",verb=True, cpu_lim=0, 
     param {int} cpu_lim: cpu limit(core).
     param {int} mem_lim: memory limit(MB).
     param {bool} strictp: weather strict.
+    
+    Returns:
+        dict with kes:
+            'restarts': int,
+            'conflicts': int,
+            'conflict cost': in ms,
+            'decisions': int,
+            'decisions cost': 0.046,
+            'propagations': int,
+            'propagations cost': in ms,
+            'conflict literals': int,
+            'actual CPU time': in ms,
+            'solving time': in ms,
+            'annealing time': in ms,
+            'simulation time': in ms,
+            'quantum count': int,
+            'quantum success number: int,,
+            'quantum conflict number': int,
+            'quantum one time solve number': int,
+            'is satisfiable': True,
+
     '''
     if verb:
         verb = 1

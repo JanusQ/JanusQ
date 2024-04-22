@@ -2,7 +2,7 @@
 Author: name/jxhhhh� 2071379252@qq.com
 Date: 2024-04-17 03:33:02
 LastEditors: name/jxhhhh� 2071379252@qq.com
-LastEditTime: 2024-04-18 08:33:33
+LastEditTime: 2024-04-21 10:53:10
 FilePath: /JanusQ/janusq/analysis/fidelity_prediction.py
 Description: 
 
@@ -58,7 +58,7 @@ class FidelityModel():
             validation_dataset = (validation_circuits, validation_fidelities)
 
         if verbose:
-            logging.info(
+            logging.warn(
                 f'len(train dataset) = {len(train_dataset[0])}, len(validation dataset) = {len(validation_dataset[0])}')
 
         devices = self.devices
@@ -86,7 +86,7 @@ class FidelityModel():
                 D.append(jnp.array(device_indices, jnp.int32))
                 
             def vectorize(circuit, vec_model: RandomwalkModel):
-                return jnp.array(vec_model.vectorize(circuit), jnp.float64)
+                return jnp.array(vec_model.vectorize(circuit), jnp.float32)
             
             GV = map(vectorize, dataset[0], multi_process, show_progress=False, vec_model = vec_model)
                 
@@ -166,13 +166,16 @@ class FidelityModel():
                 break
 
             if verbose and epoch %100 == 0:
-                jax.clear_backends()
-                logging.info(
+                logging.warn(
                     f'epoch: {epoch}, \t epoch loss = {sum(batch_losses)}, \t validation loss = {valid_loss}')
+            
+            # jax.clear_backends()
+            # jax.clear_caches()
+            
 
         self.error_weights = opt_history.best_params
         if verbose:
-            logging.info(f'finish taining')
+            logging.warn(f'finish taining')
 
         return best_params
 
