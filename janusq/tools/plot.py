@@ -15,7 +15,7 @@ import numpy as np
 import random
 
 
-def plot_scaater(reals, predicts, durations, title = ''):
+def plot_scatter(reals, predicts, durations, title = ''):
     '''
     description: plot scaater figure. the x-axis are real fidelities and the y-axis are predict fidelities.the coler of points are normalized durations
 
