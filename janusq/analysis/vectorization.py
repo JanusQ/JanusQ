@@ -165,7 +165,7 @@ def walk_on_circuit(circuit: Circuit, n_steps: int, n_walks: int, adjlist: dict,
 
 
 class RandomwalkModel():
-    def __init__(self, n_steps: int = 1, n_walks:int = 30, backend: Backend = None, directions=('parallel', 'former', 'next'), alpha: float = 1.0):
+    def __init__(self, n_steps: int = 1, n_walks:int = 30, backend: Backend = None, directions=('parallel', 'former', 'next'), decay: float = 1.0, circuits: list[Circuit] = None):
         '''
         param {int} n_steps: maximum number of random walks per gate
         param {int} n_walks: maximum step size per random walk
@@ -194,7 +194,10 @@ class RandomwalkModel():
         self.backend = backend
         self.directions = directions
         self.n_qubits = backend.n_qubits
-        self.alpha = alpha
+        self.alpha = decay
+        
+        if circuits is not None:
+            self.train(circuits, remove_redundancy=False)
 
     @property
     def pathtable(self):
@@ -219,6 +222,13 @@ class RandomwalkModel():
             reverse_pathtable[pathtable[path]] = path
 
         return pathtable[path]
+
+    def indices_of_paths(self, device, paths):
+        return [
+            self.path_index(device, path)
+            for path in paths
+            if self.has_path(device, path)
+        ]
 
     def has_path(self, device, path):
         return path in self.device_to_pathtable[device]

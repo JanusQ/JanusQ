@@ -402,32 +402,32 @@ def find_parmas(n_qubits: int, circuit: Circuit, U: np.ndarray, lr=1e-1, max_epo
 
     best_params = params
     min_loss = cost_hst(params, U)
-    for _ in range(3):
-        opt_history = OptimizingHistory(
-            params, lr, unchange_tol, n_iter_unchange, max_epoch, allowed_dist, verbose)
+    # for _ in range(3):
+    opt_history = OptimizingHistory(
+        params, lr, unchange_tol, n_iter_unchange, max_epoch, allowed_dist, verbose)
 
-        opt = optax.adamw(learning_rate=lr)
-        opt_state = opt.init(params)
+    opt = optax.adamw(learning_rate=lr)
+    opt_state = opt.init(params)
 
-        while True:
-            loss_value, gradient = jax.value_and_grad(cost_hst)(params, U)
+    while True:
+        loss_value, gradient = jax.value_and_grad(cost_hst)(params, U)
 
-            opt_history.update(loss_value, params)
+        opt_history.update(loss_value, params)
 
-            updates, opt_state = opt.update(gradient, opt_state, params)
-            params = optax.apply_updates(params, updates)
+        updates, opt_state = opt.update(gradient, opt_state, params)
+        params = optax.apply_updates(params, updates)
 
-            if opt_history.should_break:
-                break
+        if opt_history.should_break:
+            break
 
-        lr = opt_history.min_loss/10
-        params = opt_history.best_params
+    lr = opt_history.min_loss/10
+    params = opt_history.best_params
 
-        max_epoch = max_epoch // 2
+    max_epoch = max_epoch // 2
 
-        if min_loss > opt_history.min_loss:
-            min_loss = opt_history.min_loss
-            best_params = opt_history.best_params
+    if min_loss > opt_history.min_loss:
+        min_loss = opt_history.min_loss
+        best_params = opt_history.best_params
 
     circuit = assign_params(best_params, circuit)
     return Circuit(circuit, n_qubits), min_loss

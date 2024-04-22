@@ -1,3 +1,4 @@
 *.pyc
 # *.pkl
 */__pycache__
+docker_data

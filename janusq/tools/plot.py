@@ -15,9 +15,9 @@ import numpy as np
 import random
 
 
-def plot_scaater(reals, predicts, durations, title = ''):
+def plot_scatter(reals, predicts, durations, title = ''):
     '''
-    description: plot scaater figure. the x-axis are real fidelities and the y-axis are predict fidelities.the coler of points are normalized durations
+    description: plot scatter figure. the x-axis are real fidelities and the y-axis are predict fidelities.the coler of points are normalized durations
 
     '''
     par = np.polyfit(reals, predicts, 1, full=True)
@@ -47,7 +47,7 @@ def plot_scaater(reals, predicts, durations, title = ''):
     axes.set_ylim(.5, 1)
     axes.set_xlabel('real ')
     axes.set_ylabel('predict')
-    axes.plot([[0.5,0.5],[1,1]])
+    axes.plot([0,1],[0,1])
     # fig.colorbar(cm.ScalarMappable( cmap=cmap))
     # fig.savefig(name)
     print(slope, intercept)

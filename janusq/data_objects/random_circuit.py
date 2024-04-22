@@ -39,7 +39,7 @@ def random_circuits(backend: Backend, n_circuits: int, n_gate_list: list, two_qu
                 circuits.append(random_circuit(backend, n_gates, two_qubit_prob, reverse))
     return circuits
     
-# TODO: 检查下grouping_scheme的质量，会不会有太多很小的
+
 def random_grouping_scheme(backend: Backend, n_qubits_per_group: int): 
 
     grouping_scheme = []
@@ -94,7 +94,7 @@ def random_seperatable_circuits(backend: Backend, n_circuits: int, n_qubits_per_
 
 
 
-def random_circuit(backend: Backend, n_gates:int, two_qubit_prob:int, reverse:bool) -> Circuit:
+def random_circuit(backend: Backend, n_gates:int, two_qubit_prob:int, reverse:bool = False) -> Circuit:
     '''
     description: generate one citcuit 
     param {Backend} backend: circuit is generated based on backend

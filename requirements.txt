@@ -6,12 +6,14 @@ ray==2.9.2
 scikit-learn==1.4.0
 seaborn
 PennyLane==0.34.0
-jax==0.4.24
-jaxlib==0.4.24
+jax==0.3.25
+jaxlib==0.3.25
 tqdm
 cloudpickle
 # retry
-optax
+optax==0.1.4
+chex==0.1.5
+scipy==1.11.4
 matplotlib
 tensorflow-cpu==2.16.1
 torch @ https://download.pytorch.org/whl/cpu/torch-2.2.2%2Bcpu-cp310-cp310-linux_x86_64.whl

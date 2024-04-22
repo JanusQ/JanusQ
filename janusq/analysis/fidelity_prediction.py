@@ -58,7 +58,7 @@ class FidelityModel():
             validation_dataset = (validation_circuits, validation_fidelities)
 
         if verbose:
-            logging.info(
+            logging.warn(
                 f'len(train dataset) = {len(train_dataset[0])}, len(validation dataset) = {len(validation_dataset[0])}')
 
         devices = self.devices
@@ -166,13 +166,13 @@ class FidelityModel():
                 break
 
             if verbose and epoch %100 == 0:
-                jax.clear_backends()
-                logging.info(
+                # jax.clear_backends()
+                logging.warn(
                     f'epoch: {epoch}, \t epoch loss = {sum(batch_losses)}, \t validation loss = {valid_loss}')
 
         self.error_weights = opt_history.best_params
         if verbose:
-            logging.info(f'finish taining')
+            logging.warn(f'finish taining')
 
         return best_params
 
