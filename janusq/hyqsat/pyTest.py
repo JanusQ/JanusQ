@@ -5,7 +5,6 @@ import subprocess
 import inspect
 import logging
 import json
-logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 current_dir = os.getcwd()
 
