@@ -135,11 +135,11 @@ janusct_fidelities = np.array(map(lambda circuit: fidelity_model.predict_circuit
 
 # %%
 
-from janusq.tools.plot import plot_scaater
+from janusq.tools.plot import plot_scatter
 
 durations = np.array([cir.duration for cir in test_circuits])
 
-fig_quct, axes_quct = plot_scaater(test_fidelities, janusct_fidelities, durations, title = f"janusct inaccuracy = {np.abs(test_fidelities - janusct_fidelities).mean()}")
-fig_rb, axes_rb = plot_scaater(test_fidelities, rb_fidelities, durations, title = f"rb inaccuracy = {np.abs(test_fidelities - rb_fidelities).mean()}")
+fig_quct, axes_quct = plot_scatter(test_fidelities, janusct_fidelities, durations, title = f"janusct inaccuracy = {np.abs(test_fidelities - janusct_fidelities).mean()}")
+fig_rb, axes_rb = plot_scatter(test_fidelities, rb_fidelities, durations, title = f"rb inaccuracy = {np.abs(test_fidelities - rb_fidelities).mean()}")
 
 

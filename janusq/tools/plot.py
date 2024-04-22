@@ -2,7 +2,7 @@
 Author: name/jxhhhh� 2071379252@qq.com
 Date: 2024-04-17 03:33:02
 LastEditors: name/jxhhhh� 2071379252@qq.com
-LastEditTime: 2024-04-18 07:49:26
+LastEditTime: 2024-04-21 05:16:24
 FilePath: /JanusQ/janusq/tools/plot.py
 Description: 
 
@@ -15,7 +15,7 @@ import numpy as np
 import random
 
 
-def plot_scaater(reals, predicts, durations, title = ''):
+def plot_scatter(reals, predicts, durations, title = ''):
     '''
     description: plot scaater figure. the x-axis are real fidelities and the y-axis are predict fidelities.the coler of points are normalized durations
 
@@ -47,7 +47,7 @@ def plot_scaater(reals, predicts, durations, title = ''):
     axes.set_ylim(.5, 1)
     axes.set_xlabel('real ')
     axes.set_ylabel('predict')
-    axes.plot([[0.5,0.5],[1,1]])
+    axes.plot([0.5,1],[0.5,1])
     # fig.colorbar(cm.ScalarMappable( cmap=cmap))
     # fig.savefig(name)
     print(slope, intercept)
