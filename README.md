@@ -12,7 +12,7 @@ git clone git@github.com:JanusQ/JanusQ.git
 cd JanusQ
 pip install -r requirements.txt
 # or you can pull docker image from docker hub.
-docker pull jxhhhh:janusq:latest
+docker pull janusq:janusq:latest
 ```
 <!-- File Download:[Linux Janusq.](https://github.com/JanusQ/JanusQ/blob/main/dist/janusq-0.1.0-py3-none-any.whl) -->
 

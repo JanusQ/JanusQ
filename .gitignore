@@ -2,3 +2,5 @@
 # *.pkl
 */__pycache__
 docker_data
+build
+janusq.egg-info
