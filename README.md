@@ -11,9 +11,14 @@ pip install janusq.whl
 git clone git@github.com:JanusQ/JanusQ.git
 cd JanusQ
 pip install -r requirements.txt
-# or you can pull docker image from docker hub.
+
+
+
+
+# or you can directly pull docker image from docker hub.
 docker pull janusq:janusq:latest
 ```
+
 <!-- File Download:[Linux Janusq.](https://github.com/JanusQ/JanusQ/blob/main/dist/janusq-0.1.0-py3-none-any.whl) -->
 
 ## Structure of the Framework
@@ -26,8 +31,8 @@ docker pull janusq:janusq:latest
     -  janusq/optimizations/mapping/mapping_ct.py：This python script holds code related to a typical compilation flow includes routing and scheduling. The routing pass transforms the circuit to satisfy the processor topology.
   - unitary decomposition
     - janusq/analysis/unitary_decompostion.py: This python script holds code related to takes a unitary as input and decomposes it into matrices of basic gates, resulting in an equivalent circuit.
-  - bug identification: identify the potential bugs in the quantum algorithm implementation.
-    - 
+  - bug identification
+    - identify the potential bugs in the quantum algorithm implementation.
 - JanusFEM
   - benchmarking.py. Generate a circuit for measuring calibration matrices.
   - mitigation.py. Implement iterative calibration, which includes quantifying interactions between qubits and constructing Bayesian networks.

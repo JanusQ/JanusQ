@@ -4,3 +4,5 @@
 docker_data
 build/
 janusq.egg-info/
+.vscode
+.virtual_documents

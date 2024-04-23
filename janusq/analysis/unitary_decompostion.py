@@ -402,23 +402,23 @@ def find_parmas(n_qubits: int, circuit: Circuit, U: np.ndarray, lr=1e-1, max_epo
 
     best_params = params
     min_loss = cost_hst(params, U)
-    # for _ in range(3):
-    opt_history = OptimizingHistory(
-        params, lr, unchange_tol, n_iter_unchange, max_epoch, allowed_dist, verbose)
+    for _ in range(3):
+        opt_history = OptimizingHistory(
+            params, lr, unchange_tol, n_iter_unchange, max_epoch, allowed_dist, verbose)
 
-    opt = optax.adamw(learning_rate=lr)
-    opt_state = opt.init(params)
+        opt = optax.adamw(learning_rate=lr)
+        opt_state = opt.init(params)
 
-    while True:
-        loss_value, gradient = jax.value_and_grad(cost_hst)(params, U)
+        while True:
+            loss_value, gradient = jax.value_and_grad(cost_hst)(params, U)
 
-        opt_history.update(loss_value, params)
+            opt_history.update(loss_value, params)
 
-        updates, opt_state = opt.update(gradient, opt_state, params)
-        params = optax.apply_updates(params, updates)
+            updates, opt_state = opt.update(gradient, opt_state, params)
+            params = optax.apply_updates(params, updates)
 
-        if opt_history.should_break:
-            break
+            if opt_history.should_break:
+                break
 
     lr = opt_history.min_loss/10
     params = opt_history.best_params
@@ -458,15 +458,15 @@ def optimize(now_circuit: Circuit, new_layers: list[Layer], n_optimized_layers, 
 
 class ApproaxitationNode():
     def __init__(self, target_U: np.array, former_circuit: Circuit, inserted_layers: list[Layer], iter_count: int, config: dict, former_node=None,u2v_model = None):
-        former_circuit = copy.deepcopy(former_circuit)
-        inserted_layers = copy.deepcopy(inserted_layers)
+        # former_circuit = copy.deepcopy(former_circuit)
+        # inserted_layers = copy.deepcopy(inserted_layers)
 
         self.n_qubits = int(math.log2(target_U.shape[0]))
         self.target_U = target_U
 
-        self.former_circuit = former_circuit
-        self.inserted_layers = inserted_layers
-        self.circuit = former_circuit + inserted_layers
+        self.former_circuit = Circuit(former_circuit, n_qubits=self.n_qubits)
+        self.inserted_layers = Circuit(inserted_layers, n_qubits=self.n_qubits)
+        self.circuit = Circuit(former_circuit + inserted_layers)
 
         assert self.circuit.n_qubits == 4
         
@@ -551,7 +551,7 @@ class ApproaxitationNode():
     def expand(self):
         config = self.config
 
-        # self.logger.warning(f'Expanding iter_count = {self.iter_count}')
+        # logging.warning(f'Expanding iter_count = {self.iter_count}')
 
         backend: Backend = config['backend']
         n_candidates: int = config['n_candidates']
@@ -581,10 +581,9 @@ class ApproaxitationNode():
 
         best_son_node: ApproaxitationNode = self.son_nodes[np.argmax(rewards)]
 
-        # self.logger.warning(
-        #     f'iter_count= {self.iter_count} now_dist= {best_son_node.after_optimize_dist}, #gate = {best_son_node.estimated_n_gates} \n')
-        
-        logging.info(f'iter_count= {self.iter_count} now_dist= {best_son_node.after_optimize_dist}, {best_son_node.estimated_n_gates}')
+        logging.info(
+            f'iter_count= {self.iter_count} now_dist= {best_son_node.after_optimize_dist}, #gate = {best_son_node.estimated_n_gates} \n')
+
 
         return best_son_node
 
@@ -831,7 +830,6 @@ def decompose_to_gates(target_U, backend: Backend, allowed_dist=1e-5, multi_proc
     solution_nodes: list[ApproaxitationNode] = []
     now_node: ApproaxitationNode = root_node
 
-
     while len(solution_nodes) < max_solution_nodes:
         while now_node.after_optimize_dist >= allowed_dist:
             best_son_node = now_node.expand()
@@ -908,10 +906,11 @@ def decompose(target_U, allowed_dist, backend: Backend, max_n_solutions=1, multi
 
     solutions: list[Circuit] = decompose_to_small_unitaries(target_U, n_candidates=n_qubits, backend=backend,
                                                                        allowed_dist=min([0.1, allowed_dist*2]), multi_process=multi_process, logger=logger,)
-    # TODO: check the code
     solutions = solutions[:max_n_solutions]
     
     for candidate in solutions:
+        # print(matrix_distance_squared(
+        #     circuit_to_matrix(candidate, n_qubits), target_U))
         for layer in candidate:
             for gate in layer:
                 gate_qubits = gate['qubits']
@@ -927,7 +926,7 @@ def decompose(target_U, allowed_dist, backend: Backend, max_n_solutions=1, multi
                 kwargs = {
                     'target_U': gate_unitary,
                     'backend': sub_backend,
-                    'allowed_dist': allowed_dist * 2,
+                    'allowed_dist': min([0.1, allowed_dist * 2]),
                     'multi_process': multi_process,
                     'n_candidates': 10,
                     'logger': logger,
@@ -958,7 +957,7 @@ def decompose(target_U, allowed_dist, backend: Backend, max_n_solutions=1, multi
         solution_dist = matrix_distance_squared(
             circuit_to_matrix(circuit, n_qubits), target_U)
 
-        print("solution_dist", solution_dist)
+        # print("solution_dist", solution_dist)
         kwargs = {
             'n_qubits': n_qubits,
             'circuit': circuit,
@@ -970,10 +969,10 @@ def decompose(target_U, allowed_dist, backend: Backend, max_n_solutions=1, multi
             'allowed_dist': allowed_dist,
             'verbose': False,
         }
-        if multi_process:
+        if multi_process or len(solutions) > 1:
             finetune_futures.append(find_parmas_remote.remote(**kwargs))
         else:
-            finetune_futures.append(find_parmas.remote(**kwargs))
+            finetune_futures.append(find_parmas(**kwargs))
 
     finetune_dists = []
     finetune_solutions = []
@@ -986,7 +985,12 @@ def decompose(target_U, allowed_dist, backend: Backend, max_n_solutions=1, multi
         for synthesized_solution in finetune_solutions
     ]
 
-    return Circuit(finetune_solutions[int(np.argmin(n_gate_solutions))])
+    solution = Circuit(finetune_solutions[int(np.argmin(n_gate_solutions))])
+    # solution_dist = matrix_distance_squared(
+    #     circuit_to_matrix(solution, n_qubits), target_U)
+    # print("final_dist", solution_dist)
+    
+    return  solution
 
 @ray.remote
 def find_parmas_remote(*args, **kargs):

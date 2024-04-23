@@ -15,12 +15,14 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import Instruction
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from functools import lru_cache, reduce
-
+from copy import deepcopy
 
 class Gate(dict):
-    def __init__(self, gate: dict, layer_index: int = None):
+    def __init__(self, gate: dict, layer_index: int = None, copy = True):
         assert 'qubits' in gate
         assert 'name' in gate
+        if copy:
+            gate = deepcopy(gate)
         self.layer_index = layer_index
         self.index: int = None
         self.vec = None
@@ -43,7 +45,7 @@ class Layer(list):
     def __init__(self, gates: list[Gate], layer_index: int = None, copy=True):
         if copy:
             gates = [
-                Gate(gate, layer_index)
+                Gate(gate, layer_index, copy = copy)
                 for gate in gates
             ]
         super().__init__(gates)
@@ -65,7 +67,7 @@ class Circuit(list):
 
         if copy:
             layers = [
-                Layer(layer, index)
+                Layer(layer, index, copy)
                 for index, layer in enumerate(layers)
             ]
 

@@ -50,6 +50,8 @@ class OptimizingHistory(object):
         self.epcoh_time_costs.append(time.time() - self.epoch_start_time)
         self.epoch_start_time = time.time()
 
+        # epcoh_time_costs = self.epcoh_time_costs[-50:]
+        # print('Epoch: {:5d} | Loss: {:.5f}  | Dist: {:.5f} | Time: {:.3f}'.format(epoch, loss_value, loss_value, sum(epcoh_time_costs)/(len(epcoh_time_costs))))
         if self.verbose and epoch % 100 == 0:
             epcoh_time_costs = self.epcoh_time_costs[-50:]
             logging.info('Epoch: {:5d} | Loss: {:.5f}  | Dist: {:.5f} | Time: {:.3f}'.format(
