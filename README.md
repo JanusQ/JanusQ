@@ -32,8 +32,8 @@ Then run commends to install Janus-SAT.
 cd ./hyqsat
 cmake .
 make install
-cp libm* ../hyqsat
-cp minisat_core ../hyqsat
+cp libm* ../janusq/hyqsat
+cp minisat_core ../janusq/hyqsat
 ```  
 
 ## Structure of the Framework
