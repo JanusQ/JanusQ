@@ -15,12 +15,14 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import Instruction
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from functools import lru_cache, reduce
-
+from copy import deepcopy
 
 class Gate(dict):
-    def __init__(self, gate: dict, layer_index: int = None):
+    def __init__(self, gate: dict, layer_index: int = None, copy = True):
         assert 'qubits' in gate
         assert 'name' in gate
+        if copy:
+            gate = deepcopy(gate)
         self.layer_index = layer_index
         self.index: int = None
         self.vec = None
@@ -43,7 +45,7 @@ class Layer(list):
     def __init__(self, gates: list[Gate], layer_index: int = None, copy=True):
         if copy:
             gates = [
-                Gate(gate, layer_index)
+                Gate(gate, layer_index, copy = copy)
                 for gate in gates
             ]
         super().__init__(gates)
@@ -65,7 +67,7 @@ class Circuit(list):
 
         if copy:
             layers = [
-                Layer(layer, index)
+                Layer(layer, index, copy)
                 for index, layer in enumerate(layers)
             ]
 
@@ -90,6 +92,31 @@ class Circuit(list):
         #     self.measured_qubits = self.operated_qubits
         # else:
         self.measured_qubits: list[int] = measured_qubits
+    
+
+    def rx(self, angle, qubit, layer_index):
+        if layer_index >= len(self):
+            self.append(Layer([Gate({'name': 'rx', 'qubits': [qubit], 'params': [angle]})]))
+        else:
+            self[layer_index].append(Gate({'name': 'rx', 'qubits': [qubit], 'params': [angle]}))
+
+    def crz(self, angle, qubit1, qubit2, layer_index):
+        if layer_index >= len(self):
+            self.append(Layer([Gate({'name': 'crz', 'qubits': [qubit1, qubit2], 'params': [angle]})]))
+        else:
+            self[layer_index].append(Gate({'name': 'crz', 'qubits': [qubit1, qubit2], 'params': [angle]}))
+
+    def ry(self, angle, qubit, layer_index):
+        if layer_index >= len(self):
+            self.append(Layer([Gate({'name': 'ry', 'qubits': [qubit], 'params': [angle]})]))
+        else:
+            self[layer_index].append(Gate({'name': 'ry', 'qubits': [qubit], 'params': [angle]}))
+
+    def x(self, qubit, layer_index):
+        if layer_index >= len(self):
+            self.append(Layer([Gate({'name': 'x', 'qubits': [qubit], 'params': []})]))
+        else:
+            self[layer_index].append(Gate({'name': 'x', 'qubits': [qubit], 'params': []}))
 
     @property
     def num_two_qubit_gate(self):
@@ -268,7 +295,7 @@ def circuit_to_qiskit(circuit: Circuit, barrier=True) -> QuantumCircuit:
             elif name in ('cz', 'cx'):
                 assert len(params) == 0 and len(qubits) == 2
                 qiskit_circuit.__getattribute__(name)(qubits[0], qubits[1])
-            elif name in ('h', ):
+            elif name in ('h', 'x'):
                 qiskit_circuit.__getattribute__(name)(qubits[0])
             elif name in ('u', 'u3', 'u1', 'u2'):
                 '''TODO: 参数的顺序需要check下， 现在是按照pennylane的Rot的'''

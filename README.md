@@ -2,40 +2,56 @@
 A Software Framework for Analyzing, Optimizing, and Implementing Quantum Circuit.
 
 ## Installation
-For Linux:  
-- Python: version >= 3.10
-  - In shell, 'python --version' views the python version.
+
+JanusQ can be installed by docker, wheel, and soruce code. Docker is recommended, as all functions have been tested on it.
+Linux (Ubuntu 22.04 latest) platform and Python (3.10) is prefered when instaling by wheel or soruce code.
+
+### From docker
+Pull docker using docker 
+```shell
+docker pull janusq/janusq:latest
+```  
+The code is in "/JanusQ". The examples that can be directly run is in "/JanusQ/examples"
+
+### From wheel
+Download janusq.whl from "JanusQ-main/dist".
 ```shell
 pip install janusq.whl
-# or you can pull source code directly from github.
+```  
+        
+### From source code
+Run following commends.
+```shell
 git clone git@github.com:JanusQ/JanusQ.git
 cd JanusQ
 pip install -r requirements.txt
-# or you can pull docker image from docker hub.
-docker pull janusq:janusq:latest
-```
-<!-- File Download:[Linux Janusq.](https://github.com/JanusQ/JanusQ/blob/main/dist/janusq-0.1.0-py3-none-any.whl) -->
+
+```  
+Then run commends to install Janus-SAT.
+```shell
+cd ./hyqsat
+cmake .
+make install
+cp libm* ../janusq/hyqsat
+cp minisat_core ../janusq/hyqsat
+```  
 
 ## Structure of the Framework
-- JanusCT
+- Janus-CT
   - vectorization
     - janusq/analysis/vectorization.py: This python script holds code related to the generation of path table and the vecterization of circuits
   - fidelity preidiction
     - janusq/analysis/fidelity_prediction.py: This python script holds code related to training a model and using it to predict the fidelity of a circuit.
-  - fidelity optimization
-    -  janusq/optimizations/mapping/mapping_ct.py：This python script holds code related to a typical compilation flow includes routing and scheduling. The routing pass transforms the circuit to satisfy the processor topology.
   - unitary decomposition
     - janusq/analysis/unitary_decompostion.py: This python script holds code related to takes a unitary as input and decomposes it into matrices of basic gates, resulting in an equivalent circuit.
-  - bug identification: identify the potential bugs in the quantum algorithm implementation.
-    - 
-- JanusFEM
+- Janus-FEM
   - benchmarking.py. Generate a circuit for measuring calibration matrices.
   - mitigation.py. Implement iterative calibration, which includes quantifying interactions between qubits and constructing Bayesian networks.
   - tools.py. Implement data format conversion.
-- HyQSAT
+- Janus-SAT
   - hyqsat/common: This dir stores common functions about cnf files, such as readCNF.
   - hyqsat/solveSatBy**.py: The main python function; use to solve sat problem.
-- time crystal
+- Janus-TC: Simulation Of Time crystal
 
 
 ## Related papers
@@ -55,5 +71,7 @@ Siwei Tan, Congliang Lang, Liang Xiang; Shudi Wang, Xinghui Jia, Ziqi Tan, Tingt
 Xu Zhang (Zhejiang University), Wenjie Jiang (Tsinghua University), Jinfeng Deng, Ke Wang, Jiachen Chen, Pengfei Zhang, Wenhui Ren, Hang Dong, Shibo Xu, Yu Gao, Feitong Jin, Xuhao Zhu, Qiujiang Guo, Hekang Li, Chao Song, Alexey V. Gorshkov, Thomas Iadecola, Fangli Liu, Zhe-Xuan Gong, Zhen Wang* (Zhejiang University), Dong-Ling Deng* (Tsinghua University) & Haohua Wang (Zhejiang University)
 
 # Note
-1. Permission denied 'minisat_core'  
+1. When error "Permission denied 'minisat_core'" occurs, run following commends:
+```shell
 chmod +x janusq/hyqsat/minisat_core
+```

@@ -7,7 +7,7 @@ scikit-learn==1.4.0
 seaborn
 PennyLane==0.34.0
 jax==0.3.25
-jaxlib==0.3.25
+jaxlib @ https://storage.googleapis.com/jax-releases/cuda11/jaxlib-0.3.25+cuda11.cudnn805-cp310-cp310-manylinux2014_x86_64.whl
 tqdm
 cloudpickle
 # retry
