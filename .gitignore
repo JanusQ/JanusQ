@@ -4,3 +4,17 @@
 docker_data
 build/
 janusq.egg-info/
+.vscode
+.virtual_documents
+hyqsat/examples
+hyqsat/lib
+hyqsat/bin
+hyqsat/static_lib
+hyqsat/build
+hyqsat/include
+hyqsat/CMakeFiles
+hyqsat/cmake_install.cmake
+hyqsat/CMakeCache.txt
+hyqsat/install_manifest.txt
+hyqsat/lib*
+hyqsat/minisat_*

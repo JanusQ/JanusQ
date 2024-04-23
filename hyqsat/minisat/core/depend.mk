@@ -1,0 +1,1 @@
+/home/bamboosfox/minisat/minisat/core/Main.o /home/bamboosfox/minisat/minisat/core/Main.or /home/bamboosfox/minisat/minisat/core/Main.od /home/bamboosfox/minisat/minisat/core/Main.op: /home/bamboosfox/minisat/minisat/core/Main.cc
