@@ -6,7 +6,7 @@ import requests
 import numpy as np
 runUrl = "http://janusq.zju.edu.cn/api1/circuit/runTutorial"
 
-def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="simulator", API_TOKEN=None):
+def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="simulator", result_format="sample", API_TOKEN=None):
     '''
     Run circuits on the janusq backend
 
@@ -46,26 +46,35 @@ def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="s
         "circuit": circuit,
         "shots": shots,
         "run_type": run_type,
-        "label": label
+        "label": label,
     }
     max_retries = 5
     responese = None
     for _ in range(max_retries):
         try:
-            # API token: runurl of the api token.
             if API_TOKEN is None:
                 responese = requests.post(runUrl+'WithoutToken', data=json.dumps(data)).json()
             else:
                 responese = requests.post(runUrl, data=json.dumps(data)).json()
         except requests.ConnectionError:
             continue
-        if run_type == 'simulator':
-            sample = responese['data']['result']['sample']
-            probs = np.zeros(2 ** circuit.n_qubits)
-            sample_count = sum(sample.values())
-            for k, v in sample.items():
-                probs[int(k, 2)] = v / sample_count
+        if result_format == 'probs':
+            if run_type == 'simulator':
+                sample = responese['data']['result']['sample']
+                probs = np.zeros(2 ** circuit.n_qubits)
+                sample_count = sum(sample.values())
+                for k, v in sample.items():
+                    probs[int(k, 2)] = v / sample_count
+            else:
+                probs = responese['data']['result']['probs']
+            return probs
         else:
-            probs = responese['data']['result']['probs']
-        return probs
+            if run_type == 'simulator':
+                sample = responese['data']['result']['sample']
+            else:
+                sample = {}
+                probs = responese['data']['result']['probs']
+                for idx, p in enumerate(probs):
+                    sample[bin(idx)[2:].zfill(circuit.n_qubits)] = int(p * 3000)
+            return sample
     return []

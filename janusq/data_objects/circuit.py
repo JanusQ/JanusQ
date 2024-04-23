@@ -295,7 +295,7 @@ def circuit_to_qiskit(circuit: Circuit, barrier=True) -> QuantumCircuit:
             elif name in ('cz', 'cx'):
                 assert len(params) == 0 and len(qubits) == 2
                 qiskit_circuit.__getattribute__(name)(qubits[0], qubits[1])
-            elif name in ('h', ):
+            elif name in ('h', 'x'):
                 qiskit_circuit.__getattribute__(name)(qubits[0])
             elif name in ('u', 'u3', 'u1', 'u2'):
                 '''TODO: 参数的顺序需要check下， 现在是按照pennylane的Rot的'''
