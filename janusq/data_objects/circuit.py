@@ -92,6 +92,31 @@ class Circuit(list):
         #     self.measured_qubits = self.operated_qubits
         # else:
         self.measured_qubits: list[int] = measured_qubits
+    
+
+    def rx(self, angle, qubit, layer_index):
+        if layer_index >= len(self):
+            self.append(Layer([Gate({'name': 'rx', 'qubits': [qubit], 'params': [angle]})]))
+        else:
+            self[layer_index].append(Gate({'name': 'rx', 'qubits': [qubit], 'params': [angle]}))
+
+    def crz(self, angle, qubit1, qubit2, layer_index):
+        if layer_index >= len(self):
+            self.append(Layer([Gate({'name': 'crz', 'qubits': [qubit1, qubit2], 'params': [angle]})]))
+        else:
+            self[layer_index].append(Gate({'name': 'crz', 'qubits': [qubit1, qubit2], 'params': [angle]}))
+
+    def ry(self, angle, qubit, layer_index):
+        if layer_index >= len(self):
+            self.append(Layer([Gate({'name': 'ry', 'qubits': [qubit], 'params': [angle]})]))
+        else:
+            self[layer_index].append(Gate({'name': 'ry', 'qubits': [qubit], 'params': [angle]}))
+
+    def x(self, qubit, layer_index):
+        if layer_index >= len(self):
+            self.append(Layer([Gate({'name': 'x', 'qubits': [qubit], 'params': []})]))
+        else:
+            self[layer_index].append(Gate({'name': 'x', 'qubits': [qubit], 'params': []}))
 
     @property
     def num_two_qubit_gate(self):
