@@ -1,3 +1,13 @@
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 06:05:07
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-19 03:06:03
+FilePath: /JanusQ/janusq/data_objects/circuit.py
+Description: 
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
 import copy
 import logging
 import uuid
@@ -5,15 +15,17 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import Instruction
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from functools import lru_cache, reduce
-import numpy as np
-
+from copy import deepcopy
 
 class Gate(dict):
-    def __init__(self, gate: dict, layer_index: int = None):
+    def __init__(self, gate: dict, layer_index: int = None, copy = True):
         assert 'qubits' in gate
         assert 'name' in gate
+        if copy:
+            gate = deepcopy(gate)
         self.layer_index = layer_index
         self.index: int = None
+        self.vec = None
         super().__init__(gate)
 
     @property
@@ -33,17 +45,17 @@ class Layer(list):
     def __init__(self, gates: list[Gate], layer_index: int = None, copy=True):
         if copy:
             gates = [
-                Gate(gate, layer_index)
+                Gate(gate, layer_index, copy = copy)
                 for gate in gates
             ]
         super().__init__(gates)
 
 
 class Circuit(list):
-    '''TODO: 要求电路是constant'''
+    '''TODO: the circuit should be constant'''
 
     def __init__(self, layers: list[Layer], n_qubits = None, copy=True, measured_qubits = None, operated_qubits = None):  # , n_qubits=None
-        # TODO: 整一个id, 用于cache
+        # TODO: use id for cache
         self.id = uuid.uuid1()
         if isinstance(layers, Circuit) and n_qubits is None:
             n_qubits = layers.n_qubits
@@ -55,7 +67,7 @@ class Circuit(list):
 
         if copy:
             layers = [
-                Layer(layer, index)
+                Layer(layer, index, copy)
                 for index, layer in enumerate(layers)
             ]
 
@@ -80,17 +92,64 @@ class Circuit(list):
         #     self.measured_qubits = self.operated_qubits
         # else:
         self.measured_qubits: list[int] = measured_qubits
+    
+
+    def rx(self, angle, qubit, layer_index):
+        if layer_index >= len(self):
+            self.append(Layer([Gate({'name': 'rx', 'qubits': [qubit], 'params': [angle]})]))
+        else:
+            self[layer_index].append(Gate({'name': 'rx', 'qubits': [qubit], 'params': [angle]}))
+
+    def crz(self, angle, qubit1, qubit2, layer_index):
+        if layer_index >= len(self):
+            self.append(Layer([Gate({'name': 'crz', 'qubits': [qubit1, qubit2], 'params': [angle]})]))
+        else:
+            self[layer_index].append(Gate({'name': 'crz', 'qubits': [qubit1, qubit2], 'params': [angle]}))
+
+    def ry(self, angle, qubit, layer_index):
+        if layer_index >= len(self):
+            self.append(Layer([Gate({'name': 'ry', 'qubits': [qubit], 'params': [angle]})]))
+        else:
+            self[layer_index].append(Gate({'name': 'ry', 'qubits': [qubit], 'params': [angle]}))
+
+    def x(self, qubit, layer_index):
+        if layer_index >= len(self):
+            self.append(Layer([Gate({'name': 'x', 'qubits': [qubit], 'params': []})]))
+        else:
+            self[layer_index].append(Gate({'name': 'x', 'qubits': [qubit], 'params': []}))
 
     @property
-    def n_gates(self):
-        return len(self.gates)
+    def num_two_qubit_gate(self):
+        cnt = 0
+        for gate in self.gates:
+            if len(gate.qubits) > 1:
+                cnt+=1
+        return cnt
+    
+    @property
+    def duration(self, single_qubit_gate_duration= 30, two_qubit_gate_duration=60):
+        layer_types = [max([len(gate.qubits) for gate in layer]) for layer in self]
+        duration = 0
+        for layer_type in layer_types:
+            if layer_type == 1:
+                duration += single_qubit_gate_duration
+            elif layer_type == 2:
+                duration += two_qubit_gate_duration
+        return duration
     
     @property
     def depth(self):
         return len(self)
+    
+    @property
+    def n_gates(self):
+        return len(self.gates)
 
     def to_qiskit(self, barrier=True) -> QuantumCircuit:
         return circuit_to_qiskit(self, barrier=barrier)
+
+    def __str__(self) -> str:
+        return str(self.to_qiskit())
 
     def __add__(self, other: list[Layer]):
         if isinstance(other, Circuit):
@@ -101,6 +160,7 @@ class Circuit(list):
 
     def copy(self):
         return copy.deepcopy(self)
+
 
 
     def _sort_gates(self,):
@@ -164,9 +224,7 @@ class Circuit(list):
    
     def move(self, gate: Gate, new_layer: int):
         assert gate in self.gates
-        # assert gate.index == self.gates.index(gate)  # 后面可以注释掉
-        # 字典的判断是内容相等？
-        
+  
         new_circuit = self.copy()
         new_gate: Gate = new_circuit.gates[gate.index]
         now_layer: Layer = new_circuit[new_gate.layer_index]
@@ -176,7 +234,6 @@ class Circuit(list):
         new_gate.layer_index = new_layer
         
         new_circuit._sort_gates()
-        # new_circuit._sort_qubits()
         new_circuit._assign_index()
         new_circuit.clean_empty_layer()
         return new_circuit
@@ -238,7 +295,7 @@ def circuit_to_qiskit(circuit: Circuit, barrier=True) -> QuantumCircuit:
             elif name in ('cz', 'cx'):
                 assert len(params) == 0 and len(qubits) == 2
                 qiskit_circuit.__getattribute__(name)(qubits[0], qubits[1])
-            elif name in ('h', ):
+            elif name in ('h', 'x'):
                 qiskit_circuit.__getattribute__(name)(qubits[0])
             elif name in ('u', 'u3', 'u1', 'u2'):
                 '''TODO: 参数的顺序需要check下， 现在是按照pennylane的Rot的'''
@@ -258,7 +315,12 @@ def circuit_to_qiskit(circuit: Circuit, barrier=True) -> QuantumCircuit:
     return qiskit_circuit
 
 
-def qiskit_to_circuit(qiskit_circuit: QuantumCircuit):
+def qiskit_to_circuit(qiskit_circuit: QuantumCircuit) -> Circuit:
+    '''
+    description: convert a qiskiut circuit to our format circuit 
+    param {QuantumCircuit} qiskit_circuit:
+    return {Circuit}
+    '''
     layer_to_qiskit_instructions = _get_layered_instructions(qiskit_circuit)[0]
 
     layer_to_instructions = []
@@ -281,9 +343,6 @@ def _instruction_to_gate(instruction: Instruction):
 
 
 def _get_layered_instructions(circuit: QuantumCircuit):
-    '''
-    这个layer可能不是最好的，应为这个还考虑了画图的时候不要交错
-    '''
     dagcircuit, instructions, nodes = _circuit_to_dag(circuit)
     # dagcircuit.draw(filename = 'dag.svg')
     graph_layers = dagcircuit.multigraph_layers()
@@ -301,14 +360,14 @@ def _get_layered_instructions(circuit: QuantumCircuit):
 
     layer2instructions = []
     instruction2layer = [None] * len(nodes)
-    for layer, operations in enumerate(layer2operations):  # 层号，该层操作
+    for layer, operations in enumerate(layer2operations):
         layer_instructions = []
-        for node in operations:  # 该层的一个操作
+        for node in operations:
             assert node.op.name != 'barrier'
             # print(node.op.name)
             index = nodes.index(node)
             layer_instructions.append(instructions[index])
-            instruction2layer[index] = layer  # instruction在第几层
+            instruction2layer[index] = layer  # layer of instruction
         layer2instructions.append(layer_instructions)
 
     return layer2instructions, instruction2layer, instructions, dagcircuit, nodes
@@ -341,7 +400,7 @@ def _circuit_to_dag(circuit: QuantumCircuit):
         )
         if operation.name == 'barrier':
             continue
-        instructions.append(instruction)  # TODO: 这个里面会不会有barrier
+        instructions.append(instruction)
         dagnodes.append(dag_node)
         # operation._index = len(dagnodes) - 1
         assert instruction.operation.name == dag_node.op.name
@@ -353,7 +412,7 @@ def _circuit_to_dag(circuit: QuantumCircuit):
 
 def assign_barrier(qiskit_circuit):
     layer2instructions, instruction2layer, instructions, dagcircuit, nodes = _get_layered_instructions(
-        qiskit_circuit)  # instructions的index之后会作为instruction的id, nodes和instructions的顺序是一致的
+        qiskit_circuit) 
 
     new_circuit = QuantumCircuit(qiskit_circuit.num_qubits)
     for layer, instructions in enumerate(layer2instructions):

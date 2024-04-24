@@ -1,7 +1,14 @@
-from functools import reduce
-import random
-from collections import defaultdict
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 03:33:02
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-21 10:53:10
+FilePath: /JanusQ/janusq/analysis/fidelity_prediction.py
+Description: 
 
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
+import random
 import jax
 import numpy as np
 import optax
@@ -9,10 +16,10 @@ from jax import numpy as jnp
 from jax import vmap
 from sklearn.model_selection import train_test_split
 
-from data_objects.circuit import Circuit
-from tools.optimizer import OptimizingHistory
-from tools.ray_func import batch, wait, map
-from tools.saver import dump, load
+from janusq.data_objects.circuit import Circuit
+from janusq.tools.optimizer import OptimizingHistory
+from janusq.tools.ray_func import batch, wait, map
+from janusq.tools.saver import dump, load
 
 from .vectorization import RandomwalkModel, extract_device
 from tqdm import tqdm
@@ -22,6 +29,10 @@ PARAM_RESCALE = 10000  # helps eliminate loss of significance
 
 class FidelityModel():
     def __init__(self, vec_model: RandomwalkModel):
+        '''
+        description: fidelity model base on random walk model to vectorized gate, and fidelity model train base on all vectors  
+        param {RandomwalkModel} vec_model: random walk model
+        '''
         self.vec_model = vec_model
         self.backend = vec_model.backend
 
@@ -30,16 +41,24 @@ class FidelityModel():
         self.devices = list(self.vec_model.device_to_pathtable.keys())
 
     def train(self, train_dataset: tuple[list[Circuit], list[float]], validation_dataset: tuple[list[Circuit], list[float]] = None, max_epoch=1000, verbose=True, learning_rate: float = 0.01, multi_process = True):
+        '''
+        description: using MLP to train a fidelity preiction model
+        param {tuple} train_dataset: train dataset
+        param {tuple} validation_dataset: validation dataset
+        param {int} max_epoch: maximum train epochs
+        param {int} verbose: weather print log
+        param {float} learning_rate: learning rate of optimizor
+        param {bool} multi_process: weather to enable multi-process
+        '''
         vec_model = self.vec_model
         if validation_dataset is None:
-            # validation_dataset = [[], []]
             train_cirucits, validation_circuits, train_fidelities, validation_fidelities = train_test_split(
                 train_dataset[0],  train_dataset[1], test_size=.2)  # min(100, len(train_dataset[0])//5)
             train_dataset = (train_cirucits, train_fidelities)
             validation_dataset = (validation_circuits, validation_fidelities)
 
         if verbose:
-            logging.info(
+            logging.warn(
                 f'len(train dataset) = {len(train_dataset[0])}, len(validation dataset) = {len(validation_dataset[0])}')
 
         devices = self.devices
@@ -57,34 +76,19 @@ class FidelityModel():
             Y includes the fidelities of the circuits (F)
         '''
 
-        # max_n_gates = max([
-        #     len(circuit.gates)
-        #     for circuit in train_dataset[0]  # + validation_dataset[0]
-        # ])
-
-        # def pad_D(vec, dtype):
-        #     return jnp.concatenate([vec, np.zeros(max_n_gates-len(vec), dtype=dtype)])
-
-        # def pad_GV(vec, dtype):
-        #     return jnp.concatenate([vec, np.zeros((max_n_gates-len(vec), vec_model.max_table_size), dtype=dtype)])
 
         def format(dataset: tuple[list[Circuit], list[float]]) -> tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray]:
             GV, D, F = [], [], []
-            # for circuit, fidelity in tqdm(zip(*dataset)):
-            #     device_indices = self._obtain_gate_devices(circuit)
-            #     D.append(pad_D(device_indices, jnp.int32))
-            #     F.append(fidelity)
-            #     GV.append(pad_GV(vec_model.vectorize(circuit), jnp.float32))
-            
+
             for circuit, fidelity in zip(*dataset):
                 device_indices = self._obtain_gate_devices(circuit)
                 F.append(fidelity)
                 D.append(jnp.array(device_indices, jnp.int32))
                 
-            def vectorize(circuit, vec_model):
+            def vectorize(circuit, vec_model: RandomwalkModel):
                 return jnp.array(vec_model.vectorize(circuit), jnp.float32)
             
-            GV = map(vectorize, dataset[0], multi_process, show_progress=True, vec_model = vec_model)
+            GV = map(vectorize, dataset[0], multi_process, show_progress=False, vec_model = vec_model)
                 
             return jnp.array(GV), jnp.array(D), jnp.array(F)
 
@@ -110,8 +114,8 @@ class FidelityModel():
             
             n_gates_list = list(n_gates2circuit.keys())
             n_gates_list.sort()
-            logging.info("n_gates_list:", n_gates_list)
-            logging.info("n_gates_count_list:", [len(n_gates2circuit[ele][0]) for ele in n_gates_list])
+            # logging.info("n_gates_list:", n_gates_list)
+            # logging.info("n_gates_count_list:", [len(n_gates2circuit[ele][0]) for ele in n_gates_list])
             return n_gates2circuit, n_gates_list
         
         
@@ -153,8 +157,8 @@ class FidelityModel():
 
                     batch_losses.append(loss_value)
 
-                valid_loss += batch_loss(
-                    params, *n_gates2circuit_valid[gate_num]) / len(n_gates2circuit_valid[gate_num][2])
+                if n_gates2circuit_valid.__contains__(gate_num): 
+                    valid_loss += batch_loss(params, *n_gates2circuit_valid[gate_num]) / len(n_gates2circuit_valid[gate_num][2])
 
 
             opt_history.update(valid_loss, params)
@@ -163,12 +167,16 @@ class FidelityModel():
 
             if verbose and epoch %100 == 0:
                 # jax.clear_backends()
-                logging.info(
+                logging.warn(
                     f'epoch: {epoch}, \t epoch loss = {sum(batch_losses)}, \t validation loss = {valid_loss}')
+            
+            # jax.clear_backends()
+            # jax.clear_caches()
+            
 
         self.error_weights = opt_history.best_params
         if verbose:
-            logging.info(f'finish taining')
+            logging.warn(f'finish taining')
 
         return best_params
 
@@ -181,6 +189,10 @@ class FidelityModel():
         return np.array(gate_devices)
 
     def predict_circuit_fidelity(self, circuit: Circuit):
+        '''
+        description: use random walk model to vectorize a circuit and predict its fidelity
+        return {float}: circuit fidelity
+        '''
         error_params = self.error_weights
 
         gate_devices = self._obtain_gate_devices(circuit)
@@ -189,7 +201,13 @@ class FidelityModel():
         return predict_circuit_fidelity(
             error_params, vecs, gate_devices)
 
+
     def predict_gate_fidelities(self, circuit: Circuit):
+        '''
+        description: predict each gate fidelity
+        param {Circuit} circuit: target circuit
+        return {np.ndarray} gate fidelities
+        '''
         error_params = self.error_weights
 
         gate_devices = self._obtain_gate_devices(circuit)
@@ -216,12 +234,13 @@ class FidelityModel():
         all_path_errors.sort(key=lambda elm: -elm[1])
         return all_path_errors
     
+
+
+    
     def plot_path_error(self, title='', top_k=20, save_path=None, plot=True):
         '''
             draw graph to analyze the path errors
         '''
-
-
         all_path_errors = self.get_all_path_errors()
         paths = [
             path
@@ -235,7 +254,6 @@ class FidelityModel():
 
         fig = plt.figure(figsize=(top_k, 4))
 
-        # TODO: x轴画一个电路图
         plt.bar(paths, errors, width=0.8)
         plt.xticks(rotation=45)
 
@@ -248,8 +266,8 @@ class FidelityModel():
         if save_path is not None:
             plt.savefig(save_path)
 
-        if plot:
-            plt.show()
+        # if plot:
+        #     plt.show()
 
         return fig
 

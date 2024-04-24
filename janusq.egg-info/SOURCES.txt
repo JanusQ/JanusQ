@@ -1,5 +1,7 @@
 README.md
 setup.py
+examples/__init__.py
+examples/test.py
 janusq/__init__.py
 janusq.egg-info/PKG-INFO
 janusq.egg-info/SOURCES.txt
@@ -47,8 +49,6 @@ janusq/data_objects/algorithms/vqc.py
 janusq/data_objects/algorithms/vqe.py
 janusq/data_objects/algorithms/w_state.py
 janusq/dataset/__init__.py
-janusq/examples/__init__.py
-janusq/examples/fidelity_prediction.py
 janusq/hyqsat/__init__.py
 janusq/hyqsat/pyTest.py
 janusq/hyqsat/common/__init__.py
@@ -84,5 +84,6 @@ janusq/tests/test_unitary_decomposition.py
 janusq/tests/test_unitary_decomposition_alg.py
 janusq/tools/__init__.py
 janusq/tools/optimizer.py
+janusq/tools/plot.py
 janusq/tools/ray_func.py
 janusq/tools/saver.py

@@ -8,15 +8,15 @@ with open('requirements.txt') as f:
 
 setup(name='janusq',    # 包名
       version='0.1.0',        # 版本号
-      description='janusq: a full-stack framework.',
+      description='A Software Framework for Analyzing, Optimizing, and Implementing Quantum Circuit.',
       long_description=long_description,
       long_description_content_type="text/markdown",
       author='ZJU-CCNT',
       author_email='',
-      url='',
+      url='https://github.com/JanusQ/JanusQ',
       install_requires=requirements,	# 依赖包会同时被安装
       license='MIT',
       packages=find_packages(),
-      python_requires='>=3.6',
+      python_requires='>=3.10',
       include_package_data=True,
       )
