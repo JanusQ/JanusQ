@@ -13,6 +13,7 @@ Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved.
 import logging
 import pickle 
 import os
+import json
 
 
 
@@ -27,20 +28,20 @@ with open(os.path.join(dirname, 'fidelity_dataset_5q.pkl'), "rb") as f:
 
 real_qc_5bit = (real_qc_5bit[0][:200], real_qc_5bit[1][:200])
 
-with open(os.path.join(dirname, 'benchmark_circuits.pickle'), "rb") as f:
-    benchmark_circuits_and_results = pickle.load(f)  
+with open(os.path.join(dirname, 'benchmark_circuits.json'), "r") as f:
+    benchmark_circuits_and_results = json.load(f)  
 
-with open(os.path.join(dirname, 'ghz_8qubit.pickle'), "rb") as f:
-    ghz_8qubit = pickle.load(f) 
+with open(os.path.join(dirname, 'ghz_8qubit.json'), "r") as f:
+    ghz_8qubit = json.load(f) 
 
-with open(os.path.join(dirname, 'ghz_error.pickle'), "rb") as f:
-    ghz_error = pickle.load(f)  
+with open(os.path.join(dirname, 'ghz_error.json'), "r") as f:
+    ghz_error = json.load(f)  
 
-with open(os.path.join(dirname, 'protocol_8.pickle'), "rb") as f:
-    protocol_8 = pickle.load(f)   
+with open(os.path.join(dirname, 'protocol_8.json'), "r") as f:
+    protocol_8 = json.load(f)   
 
-with open(os.path.join(dirname, 'matrices_ibu.pickle'), "rb") as f:
-    matrices_ibu = pickle.load(f)   
+with open(os.path.join(dirname, 'matrices_ibu.json'), "r") as f:
+    matrices_ibu = json.load(f)   
 
 class RenameUnpickler(pickle.Unpickler):
     def find_class(self, module, name):
