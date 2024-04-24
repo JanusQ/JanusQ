@@ -1,9 +1,27 @@
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 03:33:02
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-19 02:51:09
+FilePath: /JanusQ/janusq/analysis/unitary_decompostion.py
+Description: 
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
+'''
+Author: name/jxhhhh� 2071379252@qq.com
+Date: 2024-04-17 03:33:02
+LastEditors: name/jxhhhh� 2071379252@qq.com
+LastEditTime: 2024-04-19 02:06:14
+FilePath: /JanusQ/janusq/analysis/unitary_decompostion.py
+Description: 
+
+Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
+'''
 from collections import defaultdict
 import copy
-import itertools
 import math
 import time
-import traceback
 from random import choice as random_choice, sample
 from random import randint
 
@@ -25,25 +43,225 @@ import logging
 
 from tqdm import tqdm
 
-from data_objects.backend import Backend, FullyConnectedBackend
-from data_objects.circuit import Circuit, Layer, circuit_to_qiskit, qiskit_to_circuit
-from tools.optimizer import OptimizingHistory
-from tools.ray_func import wait
+from janusq.analysis.vectorization import RandomwalkModel, extract_device
+from janusq.data_objects.backend import Backend, FullyConnectedBackend
+from janusq.data_objects.circuit import Circuit, Layer, circuit_to_qiskit, qiskit_to_circuit
+from janusq.tools.optimizer import OptimizingHistory
+from janusq.tools.ray_func import wait, map
+import inspect
+import os
 
-# TODO: gates太多了jit的compile会很慢
-# TODO: 每个node都要分开来算才能快
 
+
+class PCA():
+    def __init__(self, X, k=None, max_k=None, reduced_prop=None) -> None:
+        '''
+        description: reduce vector dimensions
+        param {*} X: data to reduce
+        param {*} max_k: top k max eigen value
+        param {*} reduced_prop: the propotion of demension to reduce
+        '''
+        X = np.concatenate([m.reshape((-1, m.shape[-1])) for m in X], axis=0)
+        X_mean = np.mean(X, axis=0)
+        X_centered = X - X_mean
+
+        C = np.cov(X_centered.T)
+
+        eigvals, eigvecs = jnp.linalg.eig(C)
+
+        sorted_indices = jnp.argsort(eigvals)[::-1]
+        sorted_eigen_values = eigvals[sorted_indices]
+
+        sum_eigen_values = jnp.sum(sorted_eigen_values)
+
+        if reduced_prop is not None:
+            k = 0
+            target_eigen_values = sum_eigen_values * reduced_prop
+            accumulated_eigen_value = 0
+            for eigen_value in sorted_eigen_values:
+                accumulated_eigen_value += eigen_value
+                k = k + 1
+                if accumulated_eigen_value > target_eigen_values or (max_k is not None and k >= max_k):
+                    break
+
+        if k is not None:
+            accumulated_eigen_value = 0
+            for eigen_value in sorted_eigen_values[:k]:
+                accumulated_eigen_value += eigen_value
+            reduced_prop = accumulated_eigen_value / sum_eigen_values
+
+        # print('k =', k)
+        # print('reduced_prop =', reduced_prop)
+
+        self.k = k
+        self.reduced_prop = reduced_prop
+        self.V_k = eigvecs[:, sorted_indices[:k]]
+        self.eigvecs = eigvecs
+        self.sorted_indices = sorted_indices[:k]
+        self.X_mean = X_mean
+        pass
+
+    def transform(self, X) -> jnp.array:
+        reduced_matrices: jnp.array = vmap(pca_transform, in_axes=(0, None, None))(X, self.X_mean, self.V_k)
+        return reduced_matrices.astype(jnp.float32)
+
+
+@jax.jit
+def pca_transform(m, X_mean, V_k):
+    m_centered = m - X_mean[jnp.newaxis, :]
+    m_reduced = jnp.dot(m_centered, V_k)
+    q, r = jnp.linalg.qr(m_reduced)
+    q = q.reshape(q.size)
+    q = jnp.concatenate([q.imag, q.real], dtype=jnp.float32)
+    return q
+
+
+
+def random_params(circuit: Circuit):
+    circuit = copy.deepcopy(circuit)
+    for layer in circuit:
+        for gate in layer:
+            gate['params'] = np.random.rand(len(gate['params'])) * 2 * np.pi
+    return circuit
+
+
+def flatten(U: np.ndarray)->np.ndarray:
+    U = U.reshape(U.size)
+    return np.concatenate([U.real, U.imag])
+
+class U2VModel():
+    def __init__(self, upstream_model: RandomwalkModel, name=None):
+        '''
+        description: turn unitary to vector candidates
+        param {RandomwalkModel} upstream_model:
+        param {str} name: model name
+        '''
+        self.upstream_model = upstream_model
+        self.backend = upstream_model.backend
+        self.n_qubits = upstream_model.n_qubits
+        self.name = name
+
+        self.pca_model = None
+        self.U_to_vec_model = None
+
+    def construct_data(self, circuits, multi_process=False):
+        '''
+        description: use circuits' vecs and its unitary construct an U2V model 
+        param {*} circuits: train dataset
+        param {bool} multi_process: weather to enable multi=process
+        '''
+        n_qubits = self.n_qubits
+        n_steps = self.upstream_model.n_steps
+
+        def gen_data(circuit, n_qubits):
+            device_gate_vecs, Us = [], []
+            sub_circuits = []
+
+            gate_vec = self.upstream_model.vectorize(circuit)
+            for layer_index, layer in enumerate(circuit):
+                for target_gate in layer:
+                    if len(target_gate['qubits']) == 1:
+                        continue
+
+                    gate_vec = target_gate.vec
+                    if len(gate_vec) == 1:
+                        continue
+
+                    device_gate_vecs.append([extract_device(target_gate), np.argwhere(gate_vec > 0).flatten()])
+                    U = circuit_to_matrix(circuit, n_qubits)
+                    Us.append(U)
+
+                    sub_circuit = circuit[layer_index:]
+                    sub_circuits.append(sub_circuit[: n_steps])
+                    break
+
+            return device_gate_vecs, Us, sub_circuits
+
+        # @ray.remote
+        # def gen_data_remote(circuit_info, n_qubits):
+        #     return gen_data(circuit_info, n_qubits)
+
+        # print('Start generating Us -> Vs, totoal', len(circuits))
+        # futures = []
+        # for index, circuit_info in enumerate(circuits):
+        #     if multi_process:
+        #         future = gen_data_remote.remote(circuit_info, n_qubits)
+        #     else:
+        #         future = gen_data(circuit_info, n_qubits)
+        #     futures.append(future)
+        # wait(futures, show_progress=True)
+        
+        futures = map(gen_data, circuits, multi_process, n_qubits = n_qubits)
+        
+
+        Vs, Us = [], []
+        sub_circuits = []
+        for index, future in enumerate(futures):
+            Vs += future[0]
+            Us += future[1]
+            sub_circuits += future[2]
+
+        Us = np.array(Us, dtype=np.complex128)  # [:100000]
+
+        print('len(Us) = ', len(Us), 'len(gate_vecs) = ', len(Vs))
+
+        return Us, Vs, sub_circuits
+
+    def train(self, data, n_candidates=15, reduced_prop=.6, max_k=100):
+        print('Start construct U2VMdoel')
+        start_time = time.time()
+
+        Us, Vs, sub_circuits = data
+
+        self.pca_model = PCA(Us, reduced_prop=reduced_prop, max_k=max_k)
+
+        Us = self.pca_model.transform(Us)
+        Us = [flatten(U) for U in Us]
+
+        self.nbrs = NearestNeighbors(n_neighbors=n_candidates, n_jobs=-1).fit(Us)  # algorithm='ball_tree',
+        self.Vs = Vs
+        self.sub_circuits = sub_circuits
+
+        print(f'Finish construct U2VMdoel, costing {time.time() - start_time}s')
+
+    def choose(self, U, verbose=False):
+        nbrs: NearestNeighbors = self.nbrs
+        upstream_model = self.upstream_model
+        Vs = self.Vs
+
+        U = self.pca_model.transform(jnp.array([U]))[0]
+        U = flatten(U)
+
+        distances, indices = nbrs.kneighbors([U])
+        distances, indices = distances[0], indices[0]
+
+        candidates = []
+
+        if len(indices) == 0: return []
+
+        for index in indices:
+            candidate = self.sub_circuits[index]
+            candidate = [layer_gates for layer_gates in candidate if len(layer_gates) != 0]
+            if len(candidate) == 0:
+                continue
+            candidates.append(candidate)
+
+        return candidates
+
+
+def recongnize_analysis():
+    pass
 config.update("jax_enable_x64", True)
+current_dir = os.path.dirname(inspect.getfile(recongnize_analysis))
 
 '''load data for decompostion'''
 IPARAMS = {}
-with open('./analysis/decomposition_data/identity_params.pkl', 'rb') as file:
-    IPARAMS: dict = pickle.load(file)
-
+with open(os.path.join(current_dir, 'decomposition_data/identity_params.pkl'), 'rb') as file:
+    IPARAMS = pickle.load(file)
 
 RFS = {}  # redundancy-free candidate set
 for n_qubits in range(4, 7):
-    with open(f'./analysis/decomposition_data/{n_qubits}_crz_best.pkl', 'rb') as file:
+    with open(os.path.join(current_dir, f'decomposition_data/{n_qubits}_crz_best.pkl'), 'rb') as file:
         circuits = pickle.load(file)
 
     for circuit in circuits:
@@ -65,7 +283,7 @@ def reshape_unitary_params(params: np.ndarray, n_qubits: int) -> np.ndarray:
 @jax.jit
 def params_to_unitary(params: jnp.ndarray) -> jnp.ndarray:
     z = 1/jnp.sqrt(2)*params
-    q, r = jnp.linalg.qr(z)  # numpy的qr没办法求导
+    q, r = jnp.linalg.qr(z)
     d = r.diagonal()
     q *= d/jnp.abs(d)
     return q
@@ -84,11 +302,10 @@ def create_unitary_gate(connect_qubits):
     if len(connect_qubits) == 1:
         return [[{'name': 'u', 'qubits': list(connect_qubits), 'params': np.zeros(3), }]]
     else:
-        # 现在的收敛方式似乎是有问题的
         n_connect_qubits = len(connect_qubits)
         return [[{
             'name': 'unitary',
-            'qubits': list(connect_qubits),  # 不知道有没有参数量更少的方法
+            'qubits': list(connect_qubits),
             'params': np.array(IPARAMS.get(n_connect_qubits, np.random.rand((4 ** n_connect_qubits) * 2))),
         }]]
 
@@ -132,11 +349,14 @@ def circuit_to_pennylane(circuit: Circuit, params=None, offest=0):
                 logging.error('Unkown gate type', gate)
                 # raise Exception('Unkown gate type', gate)
 
-
-'''TODO: 会出现比特没有被用到然后矩阵算错的情况'''
-
-
 def circuit_to_matrix(circuit: Circuit, n_qubits, params=None) -> jax.numpy.array:
+    '''
+    description: compute unitary of circuit
+    param {Circuit} circuit: target circuit
+    param {int} n_qubits: numbrer of qubits
+    param {*} params: kwargs
+    return {np.ndarray} unitary
+    '''
     if len(circuit) == 0:
         return jnp.eye(2**n_qubits)
     with qml.tape.QuantumTape() as U:
@@ -200,14 +420,14 @@ def find_parmas(n_qubits: int, circuit: Circuit, U: np.ndarray, lr=1e-1, max_epo
             if opt_history.should_break:
                 break
 
-        lr = opt_history.min_loss/10
-        params = opt_history.best_params
+    lr = opt_history.min_loss/10
+    params = opt_history.best_params
 
-        max_epoch = max_epoch // 2
+    max_epoch = max_epoch // 2
 
-        if min_loss > opt_history.min_loss:
-            min_loss = opt_history.min_loss
-            best_params = opt_history.best_params
+    if min_loss > opt_history.min_loss:
+        min_loss = opt_history.min_loss
+        best_params = opt_history.best_params
 
     circuit = assign_params(best_params, circuit)
     return Circuit(circuit, n_qubits), min_loss
@@ -237,16 +457,16 @@ def optimize(now_circuit: Circuit, new_layers: list[Layer], n_optimized_layers, 
 
 
 class ApproaxitationNode():
-    def __init__(self, target_U: np.array, former_circuit: Circuit, inserted_layers: list[Layer], iter_count: int, config: dict, former_node=None):
-        former_circuit = copy.deepcopy(former_circuit)
-        inserted_layers = copy.deepcopy(inserted_layers)
+    def __init__(self, target_U: np.array, former_circuit: Circuit, inserted_layers: list[Layer], iter_count: int, config: dict, former_node=None,u2v_model = None):
+        # former_circuit = copy.deepcopy(former_circuit)
+        # inserted_layers = copy.deepcopy(inserted_layers)
 
         self.n_qubits = int(math.log2(target_U.shape[0]))
         self.target_U = target_U
 
-        self.former_circuit = former_circuit
-        self.inserted_layers = inserted_layers
-        self.circuit = former_circuit + inserted_layers
+        self.former_circuit = Circuit(former_circuit, n_qubits=self.n_qubits)
+        self.inserted_layers = Circuit(inserted_layers, n_qubits=self.n_qubits)
+        self.circuit = Circuit(former_circuit + inserted_layers)
 
         assert self.circuit.n_qubits == 4
         
@@ -255,6 +475,7 @@ class ApproaxitationNode():
         self.former_node: ApproaxitationNode = former_node
         self.son_nodes: list[ApproaxitationNode] = []
         self.iter_count = iter_count
+        self.u2v_model = u2v_model
 
         self.backend: Backend = config['backend']
         self.n_qubits = self.backend.n_qubits
@@ -300,7 +521,7 @@ class ApproaxitationNode():
                             self.n_qubits, self.allowed_dist, self.before_optimize_dist, verbose=verbose, reset_params=reset_params)
 
     def update(self, remained_U, circuit, dist):
-        '''更新下reward'''
+        '''update reward'''
         self.remained_U = remained_U
         self.circuit = circuit
         self.after_optimize_dist = dist
@@ -330,7 +551,7 @@ class ApproaxitationNode():
     def expand(self):
         config = self.config
 
-        # self.logger.warning(f'Expanding iter_count = {self.iter_count}')
+        # logging.warning(f'Expanding iter_count = {self.iter_count}')
 
         backend: Backend = config['backend']
         n_candidates: int = config['n_candidates']
@@ -339,10 +560,8 @@ class ApproaxitationNode():
         if self.iter_count != 0:
             canditate_layers = [[]]  # 加一个空的
 
-        '假设只有u, crz'
         canditate_layers += RFS[self.n_qubits]
 
-        '''去掉重复的'''
         canditate_layers = remove_repeated_candiate(canditate_layers)
 
         futures = []
@@ -356,16 +575,15 @@ class ApproaxitationNode():
         for son_node, future in wait(futures):
             son_node.update(*future)
 
-        # TODO: 需要确定一下至少一个是大于0的
         rewards = np.array([son_node.reward for son_node in self.son_nodes])
         if np.all(rewards < 0):
             self.logger.error(f'No improvement after inserting gates')
 
-        # 增加一些随机性，靠前的比较好的都考虑进去
         best_son_node: ApproaxitationNode = self.son_nodes[np.argmax(rewards)]
 
-        self.logger.warning(
+        logging.info(
             f'iter_count= {self.iter_count} now_dist= {best_son_node.after_optimize_dist}, #gate = {best_son_node.estimated_n_gates} \n')
+
 
         return best_son_node
 
@@ -422,9 +640,6 @@ def remove_repeated_candiate(canditates: list[list[Layer]]):
 
 
 def decompose_to_small_unitaries(target_U, backend: Backend, allowed_dist=1e-5, multi_process=True, n_candidates=10, logger=logging.INFO):
-
-    # n_block: 一个candicate拆解成的block数量
-
     n_qubits = int(math.log2(len(target_U)))
 
     if n_qubits < 7:
@@ -449,13 +664,13 @@ def decompose_to_small_unitaries(target_U, backend: Backend, allowed_dist=1e-5, 
         candidates = []
         for _ in range(n_candidates):
             candidate = []
-            for _ in range(now_n_blocks):  # 感觉4比特，block_size为3的时候不需要两层
+            for _ in range(now_n_blocks): 
                 candidate_qubits = random_choice(connected_qubit_sets)
                 candidate += create_unitary_gate(candidate_qubits)
             candidates.append(candidate)
 
         candidates: list[Circuit] = remove_repeated_candiate(
-            candidates)  # 去掉重复的
+            candidates) 
 
         candidates = [
             candidate
@@ -495,7 +710,7 @@ def decompose_to_small_unitaries(target_U, backend: Backend, allowed_dist=1e-5, 
             fail_n_blocks.append(now_n_blocks)
             if now_n_blocks >= n_qubits2n_blocks[n_qubits]:
                 now_n_blocks += 1
-                logging.warning(f'n_blocks of {n_qubits} qubits should be {n_qubits2n_blocks[n_qubits]}')
+                # logging.warning(f'n_blocks of {n_qubits} qubits should be {n_qubits2n_blocks[n_qubits]}')
             else:
                 now_n_blocks = (min(success_n_blocks) + max(fail_n_blocks))//2
 
@@ -581,11 +796,11 @@ def decompose_to_small_unitaries(target_U, backend: Backend, allowed_dist=1e-5, 
 
     min_n4q = min(n_4q_to_solutions.keys())
 
-    logging.info(f'Decompose to {min_n4q} 4-q unitaries. The number of solutions are {len(n_4q_to_solutions[min_n4q])}')
+    # logging.info(f'Decompose to {min_n4q} 4-q unitaries. The number of solutions are {len(n_4q_to_solutions[min_n4q])}')
     return n_4q_to_solutions[min_n4q]
 
 
-def decompose_to_gates(target_U, backend: Backend, allowed_dist=1e-5, multi_process=True, n_candidates=40, logger=None) -> list[Circuit]:
+def decompose_to_gates(target_U, backend: Backend, allowed_dist=1e-5, multi_process=True, n_candidates=40, logger=None, u2v_model = None) -> list[Circuit]:
     assert backend.basis_two_gates == ['crz'], backend.basis_two_gates
 
     n_qubits = int(math.log2(len(target_U)))
@@ -602,7 +817,8 @@ def decompose_to_gates(target_U, backend: Backend, allowed_dist=1e-5, multi_proc
         'synthesis_start_time': time.time(),
         'logger': logger,
         'logger_level': logger,
-        'n_candidates': n_candidates,   # 逼近的候选数量，可能需要随比特数变化变化
+        'n_candidates': n_candidates,
+        u2v_model: u2v_model,
     })
     root_node.after_optimize_dist = I_dist
 
@@ -611,10 +827,9 @@ def decompose_to_gates(target_U, backend: Backend, allowed_dist=1e-5, multi_proc
     max_solution_nodes = 1
 
     all_nodes: list[ApproaxitationNode] = []
-    solution_nodes: list[ApproaxitationNode] = []  # 已经找到的分解
+    solution_nodes: list[ApproaxitationNode] = []
     now_node: ApproaxitationNode = root_node
 
-    # [340, 326, 326, 354, 368] 差距还是有的，但是不是特别大
     while len(solution_nodes) < max_solution_nodes:
         while now_node.after_optimize_dist >= allowed_dist:
             best_son_node = now_node.expand()
@@ -623,17 +838,15 @@ def decompose_to_gates(target_U, backend: Backend, allowed_dist=1e-5, multi_proc
             now_node = best_son_node
 
             if now_node.iter_count > 100:
-                break  # 防止实验里面跑太久
+                break
 
-        # TODO: 接近 estimated_n_gates要进行剪枝, 同层要是做不到接近最优的node.after_optimize_dist / node.estimated_n_gates就会被剪枝
         solution_nodes.append(now_node)
 
-        # 这样只会找最前面的一层的
         best_node: ApproaxitationNode = None
         best_reward = 0
         for node in all_nodes:
             if len(node.son_nodes) == 0:
-                if best_reward < (node.after_optimize_dist / node.estimated_n_gates):  # 单位距离内需要门最少的
+                if best_reward < (node.after_optimize_dist / node.estimated_n_gates):
                     best_reward = (node.after_optimize_dist / node.estimated_n_gates)
                     best_node = node
 
@@ -654,10 +867,18 @@ def decompose_to_gates(target_U, backend: Backend, allowed_dist=1e-5, multi_proc
     return solutions[int(np.argmin(n_gates))]
 
 
-'''还不支持backend的进一步分解'''
-'''TODO: 现在的depth很大'''
-
-def decompose(target_U, allowed_dist, backend: Backend, max_n_solutions=1, multi_process=True, logger_level=logging.WARNING) -> Circuit:
+def decompose(target_U, allowed_dist, backend: Backend, max_n_solutions=1, multi_process=True, logger_level=logging.WARNING, u2v_model: U2VModel  = None) -> Circuit:
+    '''
+    description: 
+    param {np.ndarray} target_U: target unitary
+    param {float} allowed_dist: the distance allowed between target unitary and synthesis circuit
+    param {Backend} backend: backend 
+    param {*} max_n_solutions: select n candidates per iteration
+    param {*} multi_process: weather to enbale multi-process
+    param {*} logger_level: logging level
+    param {U2VModel} u2v_model: use u2vmodel tot reduce search space of candidates
+    return {Circuit}: synthesis circuit
+    '''
 
     logger = logging.getLogger(__name__)
     logger.setLevel(logger_level)
@@ -666,17 +887,30 @@ def decompose(target_U, allowed_dist, backend: Backend, max_n_solutions=1, multi
 
     n_qubits = int(math.log2(len(target_U)))
 
-    assert n_qubits >= 4  # TODO: 小于4调用Qfast
+    assert n_qubits >= 4
 
+    if n_qubits == 4:
+        kwargs = {
+            'target_U': target_U,
+            'backend': backend,
+            'allowed_dist': allowed_dist,
+            'multi_process': multi_process,
+            'n_candidates': 10,
+            'logger': logger,
+            "u2v_model": u2v_model,
+        }
+        return decompose_to_gates(**kwargs)
+    
     # 配置
-    max_n_solutions = 1
+    max_n_solutions = 3
 
     solutions: list[Circuit] = decompose_to_small_unitaries(target_U, n_candidates=n_qubits, backend=backend,
-                                                                       allowed_dist=allowed_dist, multi_process=multi_process, logger=logger,)
+                                                                       allowed_dist=min([0.1, allowed_dist*2]), multi_process=multi_process, logger=logger,)
     solutions = solutions[:max_n_solutions]
     
-    # multi_process = False
     for candidate in solutions:
+        # print(matrix_distance_squared(
+        #     circuit_to_matrix(candidate, n_qubits), target_U))
         for layer in candidate:
             for gate in layer:
                 gate_qubits = gate['qubits']
@@ -686,18 +920,19 @@ def decompose(target_U, allowed_dist, backend: Backend, max_n_solutions=1, multi
                     unitary_params, len(gate_qubits))
                 gate_unitary = params_to_unitary(unitary_params)
 
-                suub_backend = FullyConnectedBackend(n_qubits=len(
+                sub_backend = FullyConnectedBackend(n_qubits=len(
                     gate['qubits']), basis_single_gates=['u'], basis_two_gates=['crz'])
 
                 kwargs = {
                     'target_U': gate_unitary,
-                    'backend': suub_backend,
-                    'allowed_dist': allowed_dist * 2,
+                    'backend': sub_backend,
+                    'allowed_dist': min([0.1, allowed_dist * 2]),
                     'multi_process': multi_process,
                     'n_candidates': 10,
                     'logger': logger,
+                    "u2v_model": u2v_model,
                 }
-                # gate['result'] = decompose_to_gates(**kwargs)
+
                 if multi_process:
                     gate['result'] = decompose_to_gates_remote.remote(**kwargs)
                 else:
@@ -722,6 +957,7 @@ def decompose(target_U, allowed_dist, backend: Backend, max_n_solutions=1, multi
         solution_dist = matrix_distance_squared(
             circuit_to_matrix(circuit, n_qubits), target_U)
 
+        # print("solution_dist", solution_dist)
         kwargs = {
             'n_qubits': n_qubits,
             'circuit': circuit,
@@ -733,10 +969,10 @@ def decompose(target_U, allowed_dist, backend: Backend, max_n_solutions=1, multi
             'allowed_dist': allowed_dist,
             'verbose': False,
         }
-        if multi_process:
+        if multi_process or len(solutions) > 1:
             finetune_futures.append(find_parmas_remote.remote(**kwargs))
         else:
-            finetune_futures.append(find_parmas.remote(**kwargs))
+            finetune_futures.append(find_parmas(**kwargs))
 
     finetune_dists = []
     finetune_solutions = []
@@ -749,7 +985,12 @@ def decompose(target_U, allowed_dist, backend: Backend, max_n_solutions=1, multi
         for synthesized_solution in finetune_solutions
     ]
 
-    return finetune_solutions[int(np.argmin(n_gate_solutions))]
+    solution = Circuit(finetune_solutions[int(np.argmin(n_gate_solutions))])
+    # solution_dist = matrix_distance_squared(
+    #     circuit_to_matrix(solution, n_qubits), target_U)
+    # print("final_dist", solution_dist)
+    
+    return  solution
 
 @ray.remote
 def find_parmas_remote(*args, **kargs):
