@@ -4,6 +4,7 @@ from janusq.data_objects.circuit import Circuit
 import json
 import requests
 import numpy as np
+import time
 runUrl = "http://janusq.zju.edu.cn/api1/circuit/runTutorial"
 resultUrl = "http://janusq.zju.edu.cn/api1/circuit/result"
 
@@ -77,32 +78,38 @@ def get_result(result_id: str, run_type: str, result_format="sample"):
         "result_id": result_id,
         "type": run_type
     }
-    max_retries = 5
     responese = None
-    for _ in range(max_retries):
+    while True:
         try:
             responese = requests.get(resultUrl, params=data).json()
         except requests.ConnectionError:
+            if run_type == 'simulator':
+                time.sleep(0.01)
+            else:
+                time.sleep(2)
             continue
-        if 'task_status' in  responese['data']:
-            return responese
-        if result_format == 'probs':
-            if run_type == 'simulator':
-                sample = responese['data']['sample']
-                probs = np.zeros(2 ** len(list(sample.keys())[0]))
-                sample_count = sum(sample.values())
-                for k, v in sample.items():
-                    probs[int(k, 2)] = v / sample_count
-            else:
-                probs = responese['data']['probs']
-            return probs
+        if run_type == 'simulator':
+                time.sleep(0.01)
         else:
-            if run_type == 'simulator':
-                sample = responese['data']['sample']
-            else:
-                sample = {}
-                probs = responese['data']['probs']
-                for idx, p in enumerate(probs):
-                    sample[bin(idx)[2:].zfill(np.log2(len(probs) + 1))] = int(p * 3000)
-            return sample
-        return responese
+            time.sleep(2)
+        if 'task_status' not in  responese['data']:
+            break
+    if result_format == 'probs':
+        if run_type == 'simulator':
+            sample = responese['data']['sample']
+            probs = np.zeros(2 ** len(list(sample.keys())[0]))
+            sample_count = sum(sample.values())
+            for k, v in sample.items():
+                probs[int(k, 2)] = v / sample_count
+        else:
+            probs = responese['data']['probs']
+        return probs
+    else:
+        if run_type == 'simulator':
+            sample = responese['data']['sample']
+        else:
+            sample = {}
+            probs = responese['data']['probs']
+            for idx, p in enumerate(probs):
+                sample[bin(idx)[2:].zfill(np.log2(len(probs) + 1))] = int(p * 3000)
+        return sample
