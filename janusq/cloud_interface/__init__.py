@@ -5,8 +5,9 @@ import json
 import requests
 import numpy as np
 runUrl = "http://janusq.zju.edu.cn/api1/circuit/runTutorial"
+resultUrl = "http://janusq.zju.edu.cn/api1/circuit/result"
 
-def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="simulator", result_format="sample", API_TOKEN=None):
+def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="simulator", API_TOKEN=None):
     '''
     Run circuits on the janusq backend
 
@@ -14,7 +15,7 @@ def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="s
         circuits: the quantum program in the self-defined circuit type, introduced as a set of quantum gates scheduled in 'qubit' and 'layer'
         run_options (kwargs): additional backend run options
     Returns:
-        results of runtime job. For general tasks, it returns the probability distribution of the post quantum circuit. For VQA(QNN) problems, it returns the classification prediction probability and the original grayscale image.
+        result id of runtime job. 
     Raises:
         TypeError: If the input parameters has a type mismatch with the run_options or the input circuit is not in the allowed type.
         ValueError: input parameters out of range.
@@ -47,6 +48,7 @@ def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="s
         "shots": shots,
         "run_type": run_type,
         "label": label,
+        "is_async": True
     }
     max_retries = 5
     responese = None
@@ -58,23 +60,49 @@ def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="s
                 responese = requests.post(runUrl, data=json.dumps(data)).json()
         except requests.ConnectionError:
             continue
+        return responese
+    return []
+
+def get_result(result_id: str, run_type: str, result_format="sample"):
+    '''
+    Get circuit result on the janusq backend
+
+    Args:
+        result_id: provided by submit function
+        run_type: simulator or sqcg, same as submit.
+    Returns:
+        result of runtime job. 
+    '''
+    data = {
+        "result_id": result_id,
+        "type": run_type
+    }
+    max_retries = 5
+    responese = None
+    for _ in range(max_retries):
+        try:
+            responese = requests.get(resultUrl, params=data).json()
+        except requests.ConnectionError:
+            continue
+        if 'task_status' in  responese['data']:
+            return responese
         if result_format == 'probs':
             if run_type == 'simulator':
-                sample = responese['data']['result']['sample']
-                probs = np.zeros(2 ** circuit.n_qubits)
+                sample = responese['data']['sample']
+                probs = np.zeros(2 ** len(list(sample.keys())[0]))
                 sample_count = sum(sample.values())
                 for k, v in sample.items():
                     probs[int(k, 2)] = v / sample_count
             else:
-                probs = responese['data']['result']['probs']
+                probs = responese['data']['probs']
             return probs
         else:
             if run_type == 'simulator':
-                sample = responese['data']['result']['sample']
+                sample = responese['data']['sample']
             else:
                 sample = {}
-                probs = responese['data']['result']['probs']
+                probs = responese['data']['probs']
                 for idx, p in enumerate(probs):
-                    sample[bin(idx)[2:].zfill(circuit.n_qubits)] = int(p * 3000)
+                    sample[bin(idx)[2:].zfill(np.log2(len(probs) + 1))] = int(p * 3000)
             return sample
-    return []
+        return responese
