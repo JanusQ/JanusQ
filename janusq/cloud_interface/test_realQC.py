@@ -1,4 +1,7 @@
 import sys
+sys.path.append('..')
+import time
+import sys
 sys.path.append('../..')
 from janusq.data_objects.circuit import Circuit
 import json
@@ -114,3 +117,8 @@ def get_result(result_id: str, run_type: str, result_format="sample"):
             for idx, p in enumerate(probs):
                 sample[bin(idx)[2:].zfill(np.log2(len(probs) + 1))] = int(p * 3000)
         return sample
+
+for alg in ['ghz_state', 'w_state', 'VQA', 'time_crystal']:
+    submit(circuit=None, label=alg, shots=3000, run_type='sqcg', n_qubitsAPI_TOKEN='1')
+    print('run:', alg)
+    time.sleep(30)
