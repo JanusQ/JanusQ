@@ -49,7 +49,8 @@ def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="s
         "shots": shots,
         "run_type": run_type,
         "label": label,
-        "is_async": True
+        "is_async": True,
+        "n_qubits": circuit.n_qubits
     }
     max_retries = 5
     responese = None
