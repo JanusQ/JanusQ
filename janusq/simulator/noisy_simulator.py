@@ -84,6 +84,7 @@ class NoisySimulator():
                 noisy_result, true_result))
             noisy_countses.append(n_error_paths)
 
+        # print(sum(noisy_countses)/len(noisy_countses))
         return sum(fidelities)/len(fidelities), sum(noisy_countses)/len(noisy_countses)
 
     def obtain_seperable_circuit_fidelity(self, circuit: SeperatableCircuit, n_samples=1000, circuit_reps=5):

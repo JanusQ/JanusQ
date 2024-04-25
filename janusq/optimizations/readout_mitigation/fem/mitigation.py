@@ -667,8 +667,6 @@ class Mitigator():
             assert len(statscnt[0][0]) == self.n_qubits
             measured_qubits = list(range(self.n_qubits))
 
-        
-
         opt_statscnt = statscnt
         for iter in self.iters:
             opt_statscnt = iter.mitigate(

@@ -95,9 +95,8 @@ class FidelityModel():
 
 
         def constrain(param, constraint):
-            param = param.at[param > constraint[1]].set(
-                constraint[1])
-            param = param.at[param < 0].set(constraint[0])
+            param = param.at[param < constraint[0]].set(constraint[0])
+            param = param.at[param > constraint[1]].set(constraint[1])
             return param
 
         def get_n_gates2circuit(dataset):
@@ -124,11 +123,7 @@ class FidelityModel():
         optimizer = optax.adamw(learning_rate=learning_rate)
         opt_state = optimizer.init(params)
 
-        best_params = None
-        n_iter_unchange = 10
-        unchange_tolerance = 1e-5
-        
-        opt_history = OptimizingHistory(params, learning_rate, unchange_tolerance, n_iter_unchange, max_epoch, -1e10, True)
+        opt_history = OptimizingHistory(params, learning_rate, unchange_tol = 1e-5, n_iter_unchange = 50, max_epoch = max_epoch, allowed_dist = -1e10, verbose = False)
         while True:
             batch_losses = []
             
@@ -147,8 +142,8 @@ class FidelityModel():
                     # 假设一个特征对error贡献肯定小于0.1，大于0
                     params['gate_params'] = constrain(
                         params['gate_params'], [0, PARAM_RESCALE / 10])
-                    params['circuit_bias'] = constrain(
-                        params['circuit_bias'], [-PARAM_RESCALE / 5, PARAM_RESCALE / 5])
+                    # params['circuit_bias'] = constrain(
+                    #     params['circuit_bias'], [-PARAM_RESCALE / 5, PARAM_RESCALE / 5])
 
                     batch_losses.append(loss_value)
                     
@@ -157,13 +152,14 @@ class FidelityModel():
                     valid_loss += batch_loss(params, *n_gates2circuit_valid[gate_num]) / len(n_gates2circuit_valid[gate_num][2])
 
             opt_history.update(valid_loss, params)
+            
             if opt_history.should_break:
                 break
 
-            # if verbose and epoch %100 == 0:
-            #     # jax.clear_backends()
-            #     logging.warn(
-            #         f'epoch: {epoch}, \t epoch loss = {sum(batch_losses)}, \t validation loss = {valid_loss}')
+            if verbose and opt_history.epoch %100 == 0:  #: #
+                # jax.clear_backends()
+                logging.warn(
+                    f'epoch: {opt_history.epoch}, \t epoch loss = {sum(batch_losses)}, \t validation loss = {valid_loss}')
             
             # jax.clear_backends()
             # jax.clear_caches()
@@ -173,7 +169,7 @@ class FidelityModel():
         if verbose:
             logging.warn(f'finish taining with {opt_history.epoch} epoch')
 
-        return best_params
+        return opt_history.best_params
 
     def _obtain_gate_devices(self, circuit: Circuit) -> np.array:
         gate_devices = []

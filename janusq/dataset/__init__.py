@@ -1,20 +1,9 @@
-'''
-Author: name/jxhhhh� 2071379252@qq.com
-Date: 2024-04-17 03:33:02
-LastEditors: name/jxhhhh� 2071379252@qq.com
-LastEditTime: 2024-04-18 09:30:06
-FilePath: /JanusQ/janusq/dataset/__init__.py
-Description: 
-
-Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved. 
-'''
-
-
 import logging
 import pickle 
 import os
 import json
 import traceback
+import numpy as np
 
 
 dirname = os.path.dirname(__file__)
@@ -53,11 +42,30 @@ except:
     traceback.print_exc()
 
 try:
+    with open(os.path.join(dirname, 'ghz_8qubit.json'), "r") as f:
+        ghz_8qubit = json.load(f) 
+except:
+    traceback.print_exc()
+
+try:
+    with open(os.path.join(dirname, 'ghz_error.json'), "r") as f:
+        ghz_error = json.load(f)  
+except:
+    traceback.print_exc()
+
+try:
+    with open(os.path.join(dirname, 'protocol_8.json'), "r") as f:
+        protocol_8 = json.load(f) 
+        protocol_8 = (np.array(protocol_8[0]),protocol_8[1])
+except:
+    traceback.print_exc()
+    
+try:
     with open(os.path.join(dirname, 'matrices_ibu.json'), "r") as f:
         matrices_ibu = json.load(f)   
 except:
     traceback.print_exc()
-
+    
 class RenameUnpickler(pickle.Unpickler):
     def find_class(self, module, name):
 

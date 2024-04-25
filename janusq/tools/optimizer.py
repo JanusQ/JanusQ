@@ -52,7 +52,7 @@ class OptimizingHistory(object):
 
         # epcoh_time_costs = self.epcoh_time_costs[-50:]
         # print('Epoch: {:5d} | Loss: {:.5f}  | Dist: {:.5f} | Time: {:.3f}'.format(epoch, loss_value, loss_value, sum(epcoh_time_costs)/(len(epcoh_time_costs))))
-        if self.verbose and epoch % 100 == 0:
+        if self.verbose and epoch % 10 == 0:
             epcoh_time_costs = self.epcoh_time_costs[-50:]
-            print('Epoch: {:5d} | Loss: {:.5f}  | Dist: {:.5f} | Time: {:.3f}'.format(
-                epoch, loss_value, loss_value, sum(epcoh_time_costs)/(len(epcoh_time_costs))))
+            print('Epoch: {:5d} | Loss: {:.5f}  | Time: {:.3f}'.format(
+                epoch, loss_value, sum(epcoh_time_costs)/(len(epcoh_time_costs))))

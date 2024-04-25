@@ -13,7 +13,7 @@ resultUrl = "http://janusq.zju.edu.cn/api1/circuit/result"
 
 simulator = Aer.get_backend('qasm_simulator')
 
-def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="simulator", API_TOKEN=None):
+def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="simulator", API_TOKEN=None, *args, **kwargs):
     '''
     Run circuits on the janusq backend
 
@@ -57,6 +57,7 @@ def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="s
         "is_async": True,
         "n_qubits": circuit.n_qubits if circuit is not None else 4
     }
+    data = {**data, **kwargs}
     max_retries = 5
     responese = None
     for _ in range(max_retries):
