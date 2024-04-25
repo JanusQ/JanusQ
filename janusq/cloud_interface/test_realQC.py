@@ -62,7 +62,11 @@ def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="s
             if API_TOKEN is None:
                 responese = requests.post(runUrl+'WithoutToken', data=json.dumps(data)).json()
             else:
-                responese = requests.post(runUrl, data=json.dumps(data)).json()
+                header = {
+                    "Authorization": "Bearer " + API_TOKEN,
+                    "Content-Type": "application/json"
+                }
+                responese = requests.post(runUrl, data=json.dumps(data), headers=header).json()
         except requests.ConnectionError:
             continue
         return responese
@@ -118,7 +122,12 @@ def get_result(result_id: str, run_type: str, result_format="sample"):
                 sample[bin(idx)[2:].zfill(np.log2(len(probs) + 1))] = int(p * 3000)
         return sample
 
-for alg in ['ghz_state', 'w_state', 'VQA', 'time_crystal']:
-    submit(circuit=None, label=alg, shots=3000, run_type='sqcg', API_TOKEN='1')
-    print('run:', alg)
-    time.sleep(30)
+for alg in range(1):
+    from qiskit import QuantumCircuit
+    qc = QuantumCircuit(3)
+    qc.h(0)
+    qc.cx(0, 1)
+    qc.cx(1, 2)
+    res = submit(circuit=Circuit(qc), label=alg, shots=3000, run_type='simulator', API_TOKEN='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0MDI0OTUyLCJpYXQiOjE3MTQwMTQxNTIsImp0aSI6IjA2OThlZGZjOTI3MzQ1NjNiYzQ1MzRhYTgzZWRmMTY0IiwidXNlcl9pZCI6NjAsIm5hbWUiOiJhZG1pbkB6anUuZWR1LmNuIn0.ToNFTVOp-BCVUiIZJNGKceEczdhnQaed-9HsukBZ-cs')
+    print(res)
+    print(get_result(res['data']['result_id'], run_type='simulator'))
