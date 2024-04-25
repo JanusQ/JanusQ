@@ -62,17 +62,18 @@ def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="s
     for _ in range(max_retries):
         try:
             if API_TOKEN is None:
+                logging.warning("API Token not valid or expired, use local simulator run this. Result not result_id but counts.")
                 responese = requests.post(runUrl+'WithoutToken', data=json.dumps(data)).json()
             else:
                 header = {
                     "Authorization": "Bearer " + API_TOKEN
                 }
                 responese = requests.post(runUrl, data=json.dumps(data), headers=header).json()
-                if responese['status'] == 407:
+                if responese['status'] == 407 or responese['status'] == 403:
                     qc = circuit.to_qiskit()
                     qc.measure_all()
-                    logging.warning("API Token not valid or expired, use local simulator run this. Result not result_id but counts.")
-                    return simulator.run(qc, shots=shots).result().get_counts()
+                    logging.warning("API Token not valid or expired, use local simulator run this. ")
+                    return {'status': 0, 'msg': 'success', 'data': {'result_id': simulator.run(qc, shots=shots).result().get_counts()}}
         except requests.ConnectionError:
             continue
         return responese
@@ -88,42 +89,54 @@ def get_result(result_id: str, run_type: str, result_format="sample"):
     Returns:
         result of runtime job. 
     '''
-    data = {
-        "result_id": result_id,
-        "type": run_type
-    }
-    responese = None
-    while True:
-        try:
-            responese = requests.get(resultUrl, params=data).json()
-        except requests.ConnectionError:
-            if run_type == 'simulator':
-                time.sleep(0.01)
-            else:
-                time.sleep(2)
-            continue
-        if run_type == 'simulator':
-                time.sleep(0.01)
-        else:
-            time.sleep(2)
-        if 'task_status' not in  responese['data']:
-            break
-    if result_format == 'probs':
-        if run_type == 'simulator':
-            sample = responese['data']['sample']
+    if isinstance(result_id, dict):
+        sample = result_id
+        if result_format == 'probs':
             probs = np.zeros(2 ** len(list(sample.keys())[0]))
             sample_count = sum(sample.values())
             for k, v in sample.items():
                 probs[int(k, 2)] = v / sample_count
+            return probs
         else:
-            probs = responese['data']['probs']
-        return probs
+            return sample
     else:
-        if run_type == 'simulator':
-            sample = responese['data']['sample']
+
+        data = {
+            "result_id": result_id,
+            "type": run_type
+        }
+        responese = None
+        while True:
+            try:
+                responese = requests.get(resultUrl, params=data).json()
+            except requests.ConnectionError:
+                if run_type == 'simulator':
+                    time.sleep(0.01)
+                else:
+                    time.sleep(2)
+                continue
+            if run_type == 'simulator':
+                    time.sleep(0.01)
+            else:
+                time.sleep(2)
+            if 'task_status' not in  responese['data']:
+                break
+        if result_format == 'probs':
+            if run_type == 'simulator':
+                sample = responese['data']['sample']
+                probs = np.zeros(2 ** len(list(sample.keys())[0]))
+                sample_count = sum(sample.values())
+                for k, v in sample.items():
+                    probs[int(k, 2)] = v / sample_count
+            else:
+                probs = responese['data']['probs']
+            return probs
         else:
-            sample = {}
-            probs = responese['data']['probs']
-            for idx, p in enumerate(probs):
-                sample[bin(idx)[2:].zfill(np.log2(len(probs) + 1))] = int(p * 3000)
-        return sample
+            if run_type == 'simulator':
+                sample = responese['data']['sample']
+            else:
+                sample = {}
+                probs = responese['data']['probs']
+                for idx, p in enumerate(probs):
+                    sample[bin(idx)[2:].zfill(np.log2(len(probs) + 1))] = int(p * 3000)
+            return sample

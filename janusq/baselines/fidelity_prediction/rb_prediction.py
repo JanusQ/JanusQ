@@ -154,7 +154,7 @@ def run_rb(simulator: NoisySimulator, rb_pattern, rb_circs, xdata, target_qubits
     return gpc, epc
 
 
-def get_error_1q(target_qubit, simulator, length_range = [20, 1500]):
+def get_error_1q(target_qubit, simulator, length_range = [20, 1000]):
     '''
     description: get all single qubit rb error
     param {*} target_qubit: target single qubit
@@ -163,7 +163,7 @@ def get_error_1q(target_qubit, simulator, length_range = [20, 1500]):
     rb_pattern = [[target_qubit]]
     target_qubits = [target_qubit]
     rb_circs, xdata = rb.randomized_benchmarking_seq(
-        rb_pattern=rb_pattern, nseeds=5, length_vector=np.arange(length_range[0], length_range[1], (length_range[1] - length_range[0]) //10 ), )  # seed 越多跑的越久
+        rb_pattern=rb_pattern, nseeds=2, length_vector=np.arange(length_range[0], length_range[1], (length_range[1] - length_range[0]) //10 ), )  # seed 越多跑的越久
 
     # print(rb_circs[0][-1])
 
@@ -175,7 +175,7 @@ def get_error_1q(target_qubit, simulator, length_range = [20, 1500]):
     return epg  # epg['u3'] 作为单比特门误差    #sum(epg.values()) / len(epg)
 
 
-def get_error_2q(target_qubits, error_1qs,  simulator, length_range = [20, 600]):
+def get_error_2q(target_qubits, error_1qs,  simulator, length_range = [20, 400]):
     '''
     description: get all coupler rb error
     param {*} target_qubits: target coupler
@@ -189,7 +189,7 @@ def get_error_2q(target_qubits, error_1qs,  simulator, length_range = [20, 600])
     target_qubits = target_qubits
     
     rb_circs, xdata = rb.randomized_benchmarking_seq(
-        rb_pattern=rb_pattern, nseeds=5, length_vector=np.arange(length_range[0], length_range[1], (length_range[1] - length_range[0]) //10), )  # seed 越多跑的越久
+        rb_pattern=rb_pattern, nseeds=3, length_vector=np.arange(length_range[0], length_range[1], (length_range[1] - length_range[0]) //10), )  # seed 越多跑的越久
 
     # print(rb_circs[0][-1])
     try:

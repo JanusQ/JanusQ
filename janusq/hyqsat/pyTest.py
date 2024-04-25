@@ -120,6 +120,7 @@ def solve_by_janusct(cnf_file, save=False, result_dir=".",verb=True, cpu_lim=0, 
         verb = 1
     else:
         verb = 0
+    filepath = os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core')
     process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), os.path.join(current_dir, cnf_file), result_dir, '1', str(cpu_lim),  str(mem_lim), str(strictp), "quantum", os.path.join(os.path.dirname(inspect.getfile(recongnize)), 'python/')], stdout=subprocess.PIPE, text=True)
     res = {}
     while True:

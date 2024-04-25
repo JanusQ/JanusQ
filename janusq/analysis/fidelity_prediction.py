@@ -114,8 +114,6 @@ class FidelityModel():
             
             n_gates_list = list(n_gates2circuit.keys())
             n_gates_list.sort()
-            # logging.info("n_gates_list:", n_gates_list)
-            # logging.info("n_gates_count_list:", [len(n_gates2circuit[ele][0]) for ele in n_gates_list])
             return n_gates2circuit, n_gates_list
         
         
@@ -153,7 +151,8 @@ class FidelityModel():
                         params['circuit_bias'], [-PARAM_RESCALE / 5, PARAM_RESCALE / 5])
 
                     batch_losses.append(loss_value)
-
+                    
+            for gate_num in n_gates_list:  
                 if n_gates2circuit_valid.__contains__(gate_num): 
                     valid_loss += batch_loss(params, *n_gates2circuit_valid[gate_num]) / len(n_gates2circuit_valid[gate_num][2])
 
@@ -172,7 +171,7 @@ class FidelityModel():
 
         self.error_weights = opt_history.best_params
         if verbose:
-            logging.warn(f'finish taining')
+            logging.warn(f'finish taining with {opt_history.epoch} epoch')
 
         return best_params
 
@@ -182,9 +181,9 @@ class FidelityModel():
             device = extract_device(gate)
             if device in self.devices:
                 device_index = self.devices.index(device)
-                
             else:
                 device_index = 0
+                logging.warning('warning, unkown index')
             gate_devices.append(device_index)
         return np.array(gate_devices)
 
