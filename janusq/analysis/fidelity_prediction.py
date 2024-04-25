@@ -40,7 +40,7 @@ class FidelityModel():
 
         self.devices = list(self.vec_model.device_to_pathtable.keys())
 
-    def train(self, train_dataset: tuple[list[Circuit], list[float]], validation_dataset: tuple[list[Circuit], list[float]] = None, max_epoch=1000, verbose=True, learning_rate: float = 0.01, multi_process = True):
+    def train(self, train_dataset: tuple[list[Circuit], list[float]], validation_dataset: tuple[list[Circuit], list[float]] = None, max_epoch=10000, verbose=True, learning_rate: float = 0.01, multi_process = True):
         '''
         description: using MLP to train a fidelity preiction model
         param {tuple} train_dataset: train dataset
@@ -130,11 +130,8 @@ class FidelityModel():
         n_iter_unchange = 10
         unchange_tolerance = 1e-5
         
-        
-
-        for epoch in range(max_epoch):
-            opt_history = OptimizingHistory(params, learning_rate, unchange_tolerance, n_iter_unchange, max_epoch, -1e10, False)
-            
+        opt_history = OptimizingHistory(params, learning_rate, unchange_tolerance, n_iter_unchange, max_epoch, -1e10, True)
+        while True:
             batch_losses = []
             
             random_gates_list = list(n_gates_list)
@@ -160,15 +157,14 @@ class FidelityModel():
                 if n_gates2circuit_valid.__contains__(gate_num): 
                     valid_loss += batch_loss(params, *n_gates2circuit_valid[gate_num]) / len(n_gates2circuit_valid[gate_num][2])
 
-
             opt_history.update(valid_loss, params)
             if opt_history.should_break:
                 break
 
-            if verbose and epoch %100 == 0:
-                # jax.clear_backends()
-                logging.warn(
-                    f'epoch: {epoch}, \t epoch loss = {sum(batch_losses)}, \t validation loss = {valid_loss}')
+            # if verbose and epoch %100 == 0:
+            #     # jax.clear_backends()
+            #     logging.warn(
+            #         f'epoch: {epoch}, \t epoch loss = {sum(batch_losses)}, \t validation loss = {valid_loss}')
             
             # jax.clear_backends()
             # jax.clear_caches()

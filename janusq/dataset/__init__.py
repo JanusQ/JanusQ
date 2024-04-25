@@ -14,34 +14,49 @@ import logging
 import pickle 
 import os
 import json
-
+import traceback
 
 
 dirname = os.path.dirname(__file__)
 
 
 
+try:
+    with open(os.path.join(dirname, 'fidelity_dataset_5q.pkl'), "rb") as f:
+        real_qc_5bit = pickle.load(f)
+    real_qc_5bit = (real_qc_5bit[0][:200], real_qc_5bit[1][:200])
+except:
+    traceback.print_exc()
 
+try:
+    with open(os.path.join(dirname, 'benchmark_circuits.json'), "r") as f:
+        benchmark_circuits_and_results = json.load(f)  
+except:
+    traceback.print_exc()
 
-with open(os.path.join(dirname, 'fidelity_dataset_5q.pkl'), "rb") as f:
-    real_qc_5bit = pickle.load(f)   # TODO: 整理成circuits一个数组，fidelity一个数组的形式
+try:
+    with open(os.path.join(dirname, 'ghz_8qubit.json'), "r") as f:
+        ghz_8qubit = json.load(f) 
+except:
+    traceback.print_exc()
 
-real_qc_5bit = (real_qc_5bit[0][:200], real_qc_5bit[1][:200])
+try:
+    with open(os.path.join(dirname, 'ghz_error.json'), "r") as f:
+        ghz_error = json.load(f)  
+except:
+    traceback.print_exc()
 
-with open(os.path.join(dirname, 'benchmark_circuits.json'), "r") as f:
-    benchmark_circuits_and_results = json.load(f)  
+try:
+    with open(os.path.join(dirname, 'protocol_8.json'), "r") as f:
+        protocol_8 = json.load(f)   
+except:
+    traceback.print_exc()
 
-with open(os.path.join(dirname, 'ghz_8qubit.json'), "r") as f:
-    ghz_8qubit = json.load(f) 
-
-with open(os.path.join(dirname, 'ghz_error.json'), "r") as f:
-    ghz_error = json.load(f)  
-
-with open(os.path.join(dirname, 'protocol_8.json'), "r") as f:
-    protocol_8 = json.load(f)   
-
-with open(os.path.join(dirname, 'matrices_ibu.json'), "r") as f:
-    matrices_ibu = json.load(f)   
+try:
+    with open(os.path.join(dirname, 'matrices_ibu.json'), "r") as f:
+        matrices_ibu = json.load(f)   
+except:
+    traceback.print_exc()
 
 class RenameUnpickler(pickle.Unpickler):
     def find_class(self, module, name):

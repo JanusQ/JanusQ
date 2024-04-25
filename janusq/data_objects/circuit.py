@@ -131,7 +131,6 @@ class Circuit(list):
         else:
             self[layer_index].append(Gate({'name': 'h', 'qubits': [qubit], 'params': []}))
 
-
     @property
     def num_two_qubit_gate(self):
         cnt = 0
