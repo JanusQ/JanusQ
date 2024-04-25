@@ -14,7 +14,7 @@ import logging
 import pickle 
 import os
 import json
-
+import numpy as np
 
 
 dirname = os.path.dirname(__file__)
@@ -38,7 +38,8 @@ with open(os.path.join(dirname, 'ghz_error.json'), "r") as f:
     ghz_error = json.load(f)  
 
 with open(os.path.join(dirname, 'protocol_8.json'), "r") as f:
-    protocol_8 = json.load(f)   
+    protocol_8 = json.load(f) 
+    protocol_8 = (np.array(protocol_8[0]),protocol_8[1])
 
 with open(os.path.join(dirname, 'matrices_ibu.json'), "r") as f:
     matrices_ibu = json.load(f)   
