@@ -59,7 +59,10 @@ def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="s
             if API_TOKEN is None:
                 responese = requests.post(runUrl+'WithoutToken', data=json.dumps(data)).json()
             else:
-                responese = requests.post(runUrl, data=json.dumps(data)).json()
+                header = {
+                    "Authorization": "Bearer " + API_TOKEN
+                }
+                responese = requests.post(runUrl, data=json.dumps(data), headers=header).json()
         except requests.ConnectionError:
             continue
         return responese
