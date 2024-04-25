@@ -68,8 +68,11 @@ def solve_by_minisat(cnf_file, save=False, result_dir=".", verb=1, cpu_lim=0, me
         verb = 1
     else:
         verb = 0
+    file_path = os.path.join(current_dir, cnf_file)
+    if not os.path.exists(file_path):
+        logging.error("cnf file not exists.")
     res = {}
-    process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), os.path.join(current_dir, cnf_file), result_dir, '1', str(cpu_lim),  str(mem_lim), str(strictp), "minisat", "null"], stdout=subprocess.PIPE, text=True)
+    process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), file_path, result_dir, '1', str(cpu_lim),  str(mem_lim), str(strictp), "minisat", "null"], stdout=subprocess.PIPE, text=True)
     
     while True:
         output = process.stdout.readline()
@@ -120,8 +123,10 @@ def solve_by_janusct(cnf_file, save=False, result_dir=".",verb=True, cpu_lim=0, 
         verb = 1
     else:
         verb = 0
-    filepath = os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core')
-    process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), os.path.join(current_dir, cnf_file), result_dir, '1', str(cpu_lim),  str(mem_lim), str(strictp), "quantum", os.path.join(os.path.dirname(inspect.getfile(recongnize)), 'python/')], stdout=subprocess.PIPE, text=True)
+    file_path = os.path.join(current_dir, cnf_file)
+    if not os.path.exists(file_path):
+        raise Exception("cnf file not exists.")
+    process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), file_path, result_dir, '1', str(cpu_lim),  str(mem_lim), str(strictp), "quantum", os.path.join(os.path.dirname(inspect.getfile(recongnize)), 'python/')], stdout=subprocess.PIPE, text=True)
     res = {}
     while True:
         output = process.stdout.readline()
