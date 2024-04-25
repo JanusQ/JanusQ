@@ -181,6 +181,7 @@ def correlation_based_partation(bench_results, group_size, n_qubits, draw_groupi
         if q1 == q2:
             continue
         graph.add_edge(q1, q2, freq_diff=np.round(freq_diff[q1][q2][0], 4))
+
     
     if n_qubits < 10 and draw_grouping:
         plt.clf()
@@ -238,7 +239,7 @@ def correlation_based_partation(bench_results, group_size, n_qubits, draw_groupi
     if n_qubits < 10:
         plt.subplot(1, 2, 2)
     nx.draw(partitioned_graph, with_labels=True, font_weight='bold')
-    # plt.show()
+    plt.show()
 
     return groups
 

@@ -119,6 +119,6 @@ def get_result(result_id: str, run_type: str, result_format="sample"):
         return sample
 
 for alg in ['ghz_state', 'w_state', 'VQA', 'time_crystal']:
-    submit(circuit=None, label=alg, shots=3000, run_type='sqcg', n_qubitsAPI_TOKEN='1')
+    submit(circuit=None, label=alg, shots=3000, run_type='sqcg', API_TOKEN='1')
     print('run:', alg)
     time.sleep(30)
