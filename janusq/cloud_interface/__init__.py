@@ -58,13 +58,14 @@ def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="s
         "n_qubits": circuit.n_qubits if circuit is not None else 4
     }
     data = {**data, **kwargs}
+    print(data)
     max_retries = 5
     responese = None
     for _ in range(max_retries):
         try:
             if API_TOKEN is None:
                 logging.warning("API Token not valid or expired, use local simulator run this. Result not result_id but counts.")
-                responese = requests.post(runUrl+'WithoutToken', data=json.dumps(data)).json()
+                return {'status': 0, 'msg': 'success', 'data': {'result_id': simulator.run(qc, shots=shots).result().get_counts()}}
             else:
                 header = {
                     "Authorization": "Bearer " + API_TOKEN
@@ -139,5 +140,5 @@ def get_result(result_id: str, run_type: str, result_format="sample"):
                 sample = {}
                 probs = responese['data']['probs']
                 for idx, p in enumerate(probs):
-                    sample[bin(idx)[2:].zfill(np.log2(len(probs) + 1))] = int(p * 3000)
+                    sample[bin(idx)[2:].zfill(int(np.log2(len(probs) + 1)))] = int(p * 3000)
             return sample
