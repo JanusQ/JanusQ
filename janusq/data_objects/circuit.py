@@ -124,6 +124,16 @@ class Circuit(list):
             self.append(Layer([Gate({'name': 'x', 'qubits': [qubit], 'params': []})]))
         else:
             self[layer_index].append(Gate({'name': 'x', 'qubits': [qubit], 'params': []}))
+    def h(self, qubit, layer_index):
+        if layer_index >= len(self):
+            self.append(Layer([Gate({'name': 'h', 'qubits': [qubit], 'params': []})]))
+        else:
+            self[layer_index].append(Gate({'name': 'h', 'qubits': [qubit], 'params': []}))
+    def cx(self, qubit1, qubit2, layer_index):
+        if layer_index >= len(self):
+            self.append(Layer([Gate({'name': 'cx', 'qubits': [qubit1, qubit2], 'params': []})]))
+        else:
+            self[layer_index].append(Gate({'name': 'cx', 'qubits': [qubit1, qubit2], 'params': []}))
 
     def h(self, qubit, layer_index):
         if layer_index >= len(self):

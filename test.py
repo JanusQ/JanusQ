@@ -21,8 +21,9 @@ print(len(circuits))
 
 backend = FullyConnectedBackend(5)
 up_model = RandomwalkModel(n_steps = 1, n_walks = 10, backend = backend, circuits = circuits)
+
 from janusq.analysis.fidelity_prediction import FidelityModel
 fidelity_model = FidelityModel(up_model)
-fidelity_model.train((circuits, fidelities), multi_process = False)
+fidelity_model.train((circuits, fidelities), multi_process = False, max_epoch = 20)
 circuit = random_circuit(backend, n_gates = 100, two_qubit_prob = 0.5)
 fidelity_model.predict_circuit_fidelity(circuit)

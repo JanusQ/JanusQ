@@ -24,7 +24,7 @@ dirname = os.path.dirname(__file__)
 try:
     with open(os.path.join(dirname, 'fidelity_dataset_5q.pkl'), "rb") as f:
         real_qc_5bit = pickle.load(f)
-    real_qc_5bit = (real_qc_5bit[0][:200], real_qc_5bit[1][:200])
+    real_qc_5bit = (real_qc_5bit[0][:500], real_qc_5bit[1][:500])
 except:
     traceback.print_exc()
 

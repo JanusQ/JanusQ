@@ -180,7 +180,11 @@ class FidelityModel():
         gate_devices = []
         for gate in circuit.gates:
             device = extract_device(gate)
-            device_index = self.devices.index(device)
+            if device in self.devices:
+                device_index = self.devices.index(device)
+                
+            else:
+                device_index = 0
             gate_devices.append(device_index)
         return np.array(gate_devices)
 
