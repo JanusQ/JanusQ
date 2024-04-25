@@ -5,8 +5,13 @@ import json
 import requests
 import numpy as np
 import time
+from qiskit_aer import Aer
+import logging
+
 runUrl = "http://janusq.zju.edu.cn/api1/circuit/runTutorial"
 resultUrl = "http://janusq.zju.edu.cn/api1/circuit/result"
+
+simulator = Aer.get_backend('qasm_simulator')
 
 def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="simulator", API_TOKEN=None):
     '''
@@ -63,6 +68,11 @@ def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="s
                     "Authorization": "Bearer " + API_TOKEN
                 }
                 responese = requests.post(runUrl, data=json.dumps(data), headers=header).json()
+                if responese['status'] == 407:
+                    qc = circuit.to_qiskit()
+                    qc.measure_all()
+                    logging.warning("API Token not valid or expired, use local simulator run this. Result not result_id but counts.")
+                    return simulator.run(qc, shots=shots).result().get_counts()
         except requests.ConnectionError:
             continue
         return responese
