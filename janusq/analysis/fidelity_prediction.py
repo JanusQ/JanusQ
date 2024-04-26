@@ -139,7 +139,6 @@ class FidelityModel():
                         gradient, opt_state, params)
                     params = optax.apply_updates(params, updates)
 
-                    # 假设一个特征对error贡献肯定小于0.1，大于0
                     params['gate_params'] = constrain(
                         params['gate_params'], [0, PARAM_RESCALE / 10])
                     # params['circuit_bias'] = constrain(
@@ -158,7 +157,7 @@ class FidelityModel():
 
             if verbose and opt_history.epoch %100 == 0:  #: #
                 # jax.clear_backends()
-                logging.warn(
+                print(
                     f'epoch: {opt_history.epoch}, \t epoch loss = {sum(batch_losses)}, \t validation loss = {valid_loss}')
             
             # jax.clear_backends()
@@ -167,7 +166,7 @@ class FidelityModel():
 
         self.error_weights = opt_history.best_params
         if verbose:
-            logging.warn(f'finish taining with {opt_history.epoch} epoch')
+            print(f'finish taining with {opt_history.epoch} epoch')
 
         return opt_history.best_params
 

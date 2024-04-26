@@ -6,6 +6,7 @@ import requests
 import numpy as np
 import time
 from qiskit_aer import Aer
+import qiskit
 import logging
 
 runUrl = "http://janusq.zju.edu.cn/api1/circuit/runTutorial"
@@ -63,8 +64,10 @@ def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="s
     for _ in range(max_retries):
         try:
             if API_TOKEN is None:
+                qc = circuit.to_qiskit()
+                qc.measure_all()
                 logging.warning("API Token not valid or expired, use local simulator run this. Result not result_id but counts.")
-                responese = requests.post(runUrl+'WithoutToken', data=json.dumps(data)).json()
+                return {'status': 0, 'msg': 'fail', 'data': {'result_id': simulator.run(qiskit.transpile(qc, basis_gates=['cz','u']), shots=shots).result().get_counts()}}
             else:
                 header = {
                     "Authorization": "Bearer " + API_TOKEN
@@ -74,7 +77,7 @@ def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="s
                     qc = circuit.to_qiskit()
                     qc.measure_all()
                     logging.warning("API Token not valid or expired, use local simulator run this. ")
-                    return {'status': 0, 'msg': 'success', 'data': {'result_id': simulator.run(qc, shots=shots).result().get_counts()}}
+                    return {'status': 0, 'msg': 'success', 'data': {'result_id': simulator.run(qiskit.transpile(qc, basis_gates=['cz','u']), shots=shots).result().get_counts()}}
         except requests.ConnectionError:
             continue
         return responese
@@ -139,5 +142,5 @@ def get_result(result_id: str, run_type: str, result_format="sample"):
                 sample = {}
                 probs = responese['data']['probs']
                 for idx, p in enumerate(probs):
-                    sample[bin(idx)[2:].zfill(np.log2(len(probs) + 1))] = int(p * 3000)
+                    sample[bin(idx)[2:].zfill(round((np.log2(len(probs) + 1))))] = int(p * 3000)
             return sample
