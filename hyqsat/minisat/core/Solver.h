@@ -61,6 +61,7 @@ namespace Minisat {
         bool    addClause_(      vec<Lit>& ps);                     // Add a clause to the solver without making superflous internal copy. Will
         // change the passed vector 'ps'.
         void enableQuantum() {use_quantum = true;}
+        void enableRealQC() {use_realQC = true;}
 
         // Solving:
         //
@@ -243,6 +244,7 @@ namespace Minisat {
 //    Map<Lit, std::vector<Lit>>;
 //protected:
         bool use_quantum;
+        bool use_realQC;
 
         // Helper structures:
         //

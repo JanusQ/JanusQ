@@ -135,6 +135,10 @@ public:
         PyRun_SimpleString(python_run_string.c_str());
         Solver S;
         S.enableQuantum();
+        cout << "111" << endl;
+        if (argv[9] == "True")
+            S.enableRealQC();
+        cout << "222" << endl;
         S.quantum_effect = true; // false; //
 
         scan(S, inputFile, argv, opti);
@@ -171,10 +175,12 @@ int main(int argc, char **argv)
         verb = stoi(string(argv[3]));
         cpuLim = stoi(string(argv[4]));
         memLim = stoi(string(argv[5]));
-        strictp = string(argv[6]) == "true";
+        strictp = string(argv[6]) == "True";
         methodType = string(argv[7]);
+        // arg[8] python path
+        // arg[9] realQC True 
     }
-    // dir_path_string = "/home/jiaxinghui/hyqsat/examples/UF50-218-1000/uf50-01.cnf";
+    // dir_path_string = "/home/jiaxinghui/JanusQ/hyqsat/examples/UF50-218-1000/uf50-01.cnf";
     // result_path_string = argv[2];
     // verb = 1;
     // cpuLim = 0;

@@ -59,6 +59,7 @@ def submit(circuit: Circuit=None, label=None, shots=None, chip=None, run_type="s
         "n_qubits": circuit.n_qubits if circuit is not None else 4
     }
     data = {**data, **kwargs}
+    print(data)
     max_retries = 5
     responese = None
     for _ in range(max_retries):

@@ -63,6 +63,7 @@ def solve_by_minisat(cnf_file, save=False, result_dir=".", verb=1, cpu_lim=0, me
     param {int} cpu_lim: cpu limit(core).
     param {int} mem_lim: memory limit(MB).
     param {bool} strictp: weather strict.
+    param {bool} use_realQC: weather use real QC provided by dwave. This requires auth.
     '''
     if verb:
         verb = 1
@@ -87,7 +88,7 @@ def solve_by_minisat(cnf_file, save=False, result_dir=".", verb=1, cpu_lim=0, me
         with open(f'{result_dir}/cnf_file_result.txt', mode='w') as f:
             json.dump(res, f)
     return res
-def solve_by_janusct(cnf_file, save=False, result_dir=".",verb=True, cpu_lim=0, mem_lim=0, strictp=False):
+def solve_by_janusct(cnf_file, save=False, result_dir=".",verb=True, cpu_lim=0, mem_lim=0, strictp=False, use_realQC=False):
     '''
     description: using janusct method to solve sat domain problem.
     param {str} cnf_file: input a cnf file, which needs to be solve.
@@ -126,7 +127,8 @@ def solve_by_janusct(cnf_file, save=False, result_dir=".",verb=True, cpu_lim=0, 
     file_path = os.path.join(current_dir, cnf_file)
     if not os.path.exists(file_path):
         raise Exception("cnf file not exists.")
-    process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), file_path, result_dir, '1', str(cpu_lim),  str(mem_lim), str(strictp), "quantum", os.path.join(os.path.dirname(inspect.getfile(recongnize)), 'python/')], stdout=subprocess.PIPE, text=True)
+    # print([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), file_path, result_dir, '1', str(cpu_lim),  str(mem_lim), str(strictp), "quantum", os.path.join(os.path.dirname(inspect.getfile(recongnize)), 'python/'), str(use_realQC)])
+    process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), file_path, result_dir, '1', str(cpu_lim),  str(mem_lim), str(strictp), "quantum", os.path.join(os.path.dirname(inspect.getfile(recongnize)), 'python/'), str(use_realQC)], stdout=subprocess.PIPE, text=True)
     res = {}
     while True:
         output = process.stdout.readline()

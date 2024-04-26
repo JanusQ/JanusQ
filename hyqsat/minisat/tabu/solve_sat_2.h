@@ -325,16 +325,24 @@ string itoa_self(int i)
     return ss.str();
 }
 // void dwave2python(vector<vector<int> > &clauses,int total_clause_size)
-void dwave2python(string clauses, map<Var, lbool> &var_result)
+void dwave2python(string clauses, map<Var, lbool> &var_result, bool is_real)
 {
+    cout << "is_real:" << (is_real? "True":"False") << endl;
     PyObject* pModule = NULL;
     PyObject* pFunc = NULL;
     pModule = PyImport_ImportModule("test_noise");
     pFunc = PyObject_GetAttrString(pModule,"solve");
-
-    PyObject* pParams =  Py_BuildValue("(s)", clauses.c_str());
+    // real
+    cout << "this 1"<< endl;
+    PyObject* pArgs = PyTuple_New(2);
+    PyTuple_SetItem(pArgs, 0, Py_BuildValue("(s)", clauses.c_str()));
+    PyTuple_SetItem(pArgs, 1, Py_BuildValue("(s)", (is_real? "True":"False")));
+    cout << "this 2"<< endl;
+    // PyObject* pParams =  Py_BuildValue("(s)", clauses.c_str());
     // cout<<"HERE in dwave2python\n";
-    PyObject* pRet = PyObject_CallObject(pFunc,pParams);
+    // PyObject* pRet = PyObject_CallObject(pFunc,pParams);
+    PyObject* pRet = PyObject_CallObject(pFunc, pArgs);
+    cout << "this 3"<< endl;
     PyObject* pIsSatisfy = PyDict_GetItemString(pRet,"satisfy");
     char* isSatisfy;
     PyArg_Parse(pIsSatisfy,"s",&isSatisfy);
@@ -357,13 +365,14 @@ void dwave2python(string clauses, map<Var, lbool> &var_result)
 
 
     Py_CLEAR(pModule);
-    Py_CLEAR(pParams);
+    // Py_CLEAR(pParams);
+    Py_CLEAR(pArgs);
     Py_CLEAR(pFunc);
     Py_CLEAR(pRet);
 }
 
-bool dwave(string clauses,  map<Var, lbool> &var_result){
-    dwave2python(clauses,var_result);
+bool dwave(string clauses,  map<Var, lbool> &var_result, bool is_real){
+    dwave2python(clauses, var_result, is_real);
     // cout<<"Here\n";
     if(var_result.size()==0) return false;
     return true;
@@ -511,7 +520,7 @@ bool solveSATQuantum(Solver &S, vec<Lit> &learnt_clause, int &backtrack_level, i
     bool success = false;
     minisat_solver.random_seed = rand();
     map<Var, lbool> success_Lit;
-    success = dwave(clauses2python, success_Lit);
+    success = dwave(clauses2python, success_Lit, S.use_realQC);
 
 
     S.solveNum++;
