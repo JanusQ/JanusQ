@@ -46,9 +46,15 @@ def reoraginize(clauses):
 
 # clauses, literals = readCNF_intr('/Users/siwei/workspace/solveClauses128/uuf200-048_8.txt')
 
-def solve(lines):
+def solve(lines, is_real):
     # clauses, literals = readCNF(path)
     # print(lines)
+    # 判断是否使用真机
+    lines = lines[0]
+    is_real = is_real[0]
+
+    is_real = True if is_real == "True" else False
+
     clauses, literals = dealCNF_intr(lines)
     # print(clauses)
     # if len(clauses) < 30:  #or len(clauses) > 300
@@ -149,14 +155,15 @@ def solve(lines):
 
 
     bqm = dimod.BQM.from_qubo(Q)
-
-    sampler = neal.SimulatedAnnealingSampler()
-    sampleset = sampler.sample(bqm, num_reads=1)
-    # print('embedding')
-    # print('before sample')
-    # sampler = EmbeddingComposite(DWaveSampler())
-    # sampleset = sampler.sample(bqm, num_reads=2)
-    # print('after sample')
+    if not is_real:
+        sampler = neal.SimulatedAnnealingSampler()
+        sampleset = sampler.sample(bqm, num_reads=1)
+    else:
+        print('embedding')
+        print('before sample')
+        sampler = EmbeddingComposite(DWaveSampler())
+        sampleset = sampler.sample(bqm, num_reads=2)
+        print('after sample')
 
     # print(bias)
     # print(sampleset)
