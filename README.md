@@ -6,7 +6,7 @@ A Software Framework for Analyzing, Optimizing, and Implementing Quantum Circuit
 JanusQ can be installed by docker, wheel, and soruce code. Docker is recommended, as all functions have been tested on it.
 Linux (Ubuntu 22.04 latest) platform and Python (3.10) is prefered when instaling by wheel or soruce code.
 
-### From docker
+### From docker (Recommended)
 Pull docker using docker 
 ```shell
 docker pull janusq/janusq:latest
