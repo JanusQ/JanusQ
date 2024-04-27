@@ -21,7 +21,7 @@ ssh root@localhost -p 8888
 ```
 or
 ```shell
- docker exec -it tutorial  bash
+ docker exec -it tutorial bash
 ```
 The code is in "/JanusQ". The examples that can be directly run is in "/JanusQ/examples"
 
