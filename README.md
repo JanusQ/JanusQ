@@ -10,7 +10,19 @@ Linux (Ubuntu 22.04 latest) platform and Python (3.10) is prefered when instalin
 Pull docker using docker 
 ```shell
 docker pull janusq/janusq:latest
-```  
+```
+Run docker image
+```shell
+docker run -itd -p 8888:22 -p 9999:23 --name tutorial janusq/janusq
+```
+The jupyter notebook can be visited in "http://localhost:9999/lab?". The docker can be accessed via
+```shell
+ssh root@localhost -p 8888
+
+or
+
+ docker exec -it tutorial  bash
+```
 The code is in "/JanusQ". The examples that can be directly run is in "/JanusQ/examples"
 
 ### From wheel
