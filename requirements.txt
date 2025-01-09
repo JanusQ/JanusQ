@@ -6,17 +6,17 @@ ray==2.9.2
 scikit-learn==1.4.0
 seaborn
 PennyLane==0.34.0
-jax==0.3.25
-jaxlib @ https://storage.googleapis.com/jax-releases/nocuda/jaxlib-0.3.25-cp310-cp310-manylinux2014_x86_64.whl
+jax
+jaxlib
 tqdm
 cloudpickle
 # retry
-optax==0.1.4
-chex==0.1.5
-scipy==1.11.4
+optax
+chex
+scipy
 matplotlib
-tensorflow-cpu==2.16.1
-torch @ https://download.pytorch.org/whl/cpu/torch-2.2.2%2Bcpu-cp310-cp310-linux_x86_64.whl
+tensorflow
+torch
 pgmpy
 bqskit
 jupyter

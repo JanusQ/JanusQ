@@ -33,7 +33,7 @@ import pennylane as qml
 
 from jax import numpy as jnp
 from jax import vmap
-from jax.config import config
+from jax import config
 from qiskit import QuantumCircuit, transpile
 from sklearn.neighbors import NearestNeighbors
 

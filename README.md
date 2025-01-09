@@ -87,3 +87,7 @@ Xu Zhang (Zhejiang University), Wenjie Jiang (Tsinghua University), Jinfeng Deng
 ```shell
 chmod +x janusq/hyqsat/minisat_core
 ```
+2. When error "Library not loaded: @rpath/libpython3.10.dylib" occurs, run following commends:
+```shell
+install_name_tool -add_rpath /path/to/python3.10/lib janusq/hyqsat/minisat_core
+```
