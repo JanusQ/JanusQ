@@ -221,7 +221,7 @@ int scan(Solver &S, string path, char **argv, vector<int> &opti)
         std::ifstream in;
         in.open(path, ios::in);
         if (!in.is_open())
-            printf("ERROR! Could not open file: %s\n", path), exit(1);
+            printf("ERROR! Could not open file: %s\n", path.c_str()), exit(1);
 
         if (S.verbosity > 0)
         {
