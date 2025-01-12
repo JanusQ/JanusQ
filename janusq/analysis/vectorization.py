@@ -24,7 +24,7 @@ def instruction2str(instruction):
         qubits.sort()
         op_name = instruction['name']
 
-    return f'{op_name},{",".join([str(_) for _ in qubits])}'
+    return f"{op_name}-{'-'.join([str(_) for _ in qubits])}"
 
 
 def extract_device(gate:Gate):
@@ -51,7 +51,7 @@ class Step():
         if self.edge == 'loop':
             return str(self.target)
         else:
-            return f'{self.edge}-{self.target}'
+            return f'{self.edge}, {self.target}'
 
 # TODO: there should be a step factory in the future to reduce the memory cost
 
@@ -77,7 +77,7 @@ class Path():
 
     def __hash__(self): return hash(self._path_id)
 
-    def __str__(self): return '-'.join([str(step) for step in self.steps])
+    def __str__(self): return ', '.join([str(step) for step in self.steps])
 
 
 def _bfs_walk(traveled_paths: set, traveled_gates: list, path, circuit: Circuit, now_gate: Gate, head_gate: dict, adjlist: dict, n_steps: int,
@@ -383,7 +383,7 @@ class RandomwalkModel():
                     for path_id in paths:
                         if self.has_path(device, path_id):
                             path_index = self.path_index(device, path_id)
-                            path_len = len(path_id.split('-'))//2
+                            path_len = len(path_id.split(', ')) // 2
                             vec[int(path_index)] = self.alpha ** path_len
             gate.vec = vec  
             vecs.append(vec)
@@ -407,7 +407,7 @@ class RandomwalkModel():
 
     @staticmethod
     def parse_gate_str(gate_str):
-        elms = gate_str.split(',')
+        elms = gate_str.split('-')
         gate = {
             'name': elms[0],
             'qubits': [int(qubit) for qubit in elms[1:]]
@@ -450,7 +450,7 @@ class RandomwalkModel():
         for path in paths:
             now_layer = head_layer
 
-            elms = path.split('-')
+            elms = path.split(', ')
             if len(elms) == 1:
                 head_gate.update(self.parse_gate_str(elms[0]))
                 head_gate['params'] *= 3
