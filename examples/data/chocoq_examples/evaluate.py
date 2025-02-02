@@ -8,14 +8,14 @@ import itertools
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor, TimeoutError
 
-from chocoq.problems.facility_location_problem import generate_flp
-from chocoq.problems.graph_coloring_problem import generate_gcp
-from chocoq.problems.k_partition_problem import generate_kpp
-from chocoq.problems.job_scheduling_problem import generate_jsp
-from chocoq.problems.traveling_salesman_problem import generate_tsp
-from chocoq.problems.set_cover_problem import generate_scp
-from chocoq.solvers.optimizers import CobylaOptimizer, AdamOptimizer
-from chocoq.solvers.qiskit import (
+from janusq.application.chocoq.chocoq.problems.facility_location_problem import generate_flp
+from janusq.application.chocoq.chocoq.problems.graph_coloring_problem import generate_gcp
+from janusq.application.chocoq.chocoq.problems.k_partition_problem import generate_kpp
+from janusq.application.chocoq.chocoq.problems.job_scheduling_problem import generate_jsp
+from janusq.application.chocoq.chocoq.problems.traveling_salesman_problem import generate_tsp
+from janusq.application.chocoq.chocoq.problems.set_cover_problem import generate_scp
+from janusq.application.chocoq.chocoq.solvers.optimizers import CobylaOptimizer, AdamOptimizer
+from janusq.application.chocoq.chocoq.solvers.qiskit import (
     PenaltySolver, CyclicSolver, HeaSolver, ChocoSolver, 
     AerGpuProvider, AerProvider, FakeBrisbaneProvider, FakeKyivProvider, FakeTorinoProvider, DdsimProvider,
 )
@@ -24,6 +24,7 @@ import pandas as pd
 pd.set_option('display.max_rows', None)  # display all rows
 pd.set_option('display.max_columns', None)  # display all columns.
 
+file_path = "./large_scale"
 num_cases = 10  # The number of cases in each benchmark
 problem_scale = 4 # The problem scale, 1 is the minimal scale like F1,K1,G1 in Table 1 of paper
 #2 means F2 K2 ... In CPU version, this benchmarks with higher scale is much slower when solving with baselines.
@@ -33,12 +34,10 @@ gcp_problems_pkg, gcp_configs_pkg = generate_gcp(num_cases, [(3, 1), (3, 2), (4,
 kpp_problems_pkg, kpp_configs_pkg = generate_kpp(num_cases, [(4, 2, 3), (6, 3, 5), (8, 3, 7), (9, 3, 8)][:problem_scale], 1, 20)
 
 configs_pkg = flp_configs_pkg + gcp_configs_pkg + kpp_configs_pkg
-with open(f"2_table_all_scale.config", "w") as file:
+with open(f"{file_path}/problem.config", "w") as file:
     for pkid, configs in enumerate(configs_pkg):
         for problem in configs:
             file.write(f'{pkid}: {problem}\n')
-
-new_path = '2_table_depth_all_scale'
 
 problems_pkg = flp_problems_pkg + gcp_problems_pkg + kpp_problems_pkg
 
@@ -68,7 +67,7 @@ def process_layer(prb, num_layers, solver, metrics_lst):
 if __name__ == '__main__':
     set_timeout = 60 * 60 * 24 # Set timeout duration
     num_complete = 0
-    with open(f'{new_path}.csv', mode='w', newline='') as file:
+    with open(f"{file_path}/evaluate_depth.csv", mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(headers)  # Write headers once
 
@@ -93,7 +92,7 @@ if __name__ == '__main__':
             try:
                 result = future.result(timeout=remaining_time)
                 diff.extend(result)
-                print(f"Task for problem {pkid}, num_layers {num_layers} executed successfully.")
+                # print(f"Task for problem {pkid}, num_layers {num_layers} executed successfully.")
             except MemoryError:
                 diff.append('memory_error')
                 print(f"Task for problem {pkid}, num_layers {num_layers} encountered a MemoryError.")
@@ -102,12 +101,12 @@ if __name__ == '__main__':
                 print(f"Task for problem {pkid}, num_layers {num_layers} timed out.")
             finally:
                 row = [pkid, solver, num_layers] + diff
-                with open(f'{new_path}.csv', mode='a', newline='') as file:
+                with open(f"{file_path}/evaluate_depth.csv", mode='a', newline='') as file:
                     writer = csv.writer(file)
                     writer.writerow(row)  # Write row immediately
                 num_complete += 1
                 if num_complete == len(futures):
-                    print(f'Data has been written to {new_path}.csv')
+                    print(f'Data has been written to {file_path}/evaluate_depth.csv')
                     for process in executor._processes.values():
                         os.kill(process.pid, signal.SIGTERM)
 
@@ -150,7 +149,6 @@ def process_layer(prb, num_layers, solver):
     used_solver = solver(
         prb_model = prb,
         optimizer = opt,
-        # 根据配置的环境选择CPU或GPU
         # provider = cpu if solver in [PenaltySolver, CyclicSolver, HeaSolver] else ddsim,
         provider = gpu if solver in [PenaltySolver, CyclicSolver, HeaSolver] else ddsim,
         num_layers = num_layers,
@@ -167,12 +165,12 @@ if __name__ == '__main__':
     set_timeout = 60 * 60 * 2 # Set timeout duration
     num_complete = 0
 
-    with open(f'{new_path}.csv', mode='w', newline='') as file:
+    with open(f"{file_path}/evaluate_other.csv", mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(headers)  # 写入标题
+        writer.writerow(headers)
 
     num_processes_cpu = os.cpu_count()
-    # pkid-pbid: 问题包序-包内序号
+    # pkid-pbid: problem package id - problem id
     for pkid, (diff_level, problems) in enumerate(problems_pkg):
         for solver in solvers:
             if solver in [PenaltySolver, CyclicSolver, HeaSolver]:
@@ -200,7 +198,7 @@ if __name__ == '__main__':
                     try:
                         metrics = future.result(timeout=remaining_time)
                         diff.extend(metrics)
-                        print(f"Task for problem {pkid}-{pbid} L={layer} {solver} executed successfully.")
+                        # print(f"Task for problem {pkid}-{pbid} L={layer} {solver} executed successfully.")
                     except MemoryError:
                         print(f"Task for problem {pkid}-{pbid} L={layer} {solver} encountered a MemoryError.")
                         for dict_term in evaluation_metrics:
@@ -213,7 +211,7 @@ if __name__ == '__main__':
                         print(f"An error occurred: {e}")
                     finally:
                         row = [pkid, pbid, layer, len(prb.variables), len(prb.lin_constr_mtx), solver] + diff
-                        with open(f'{new_path}.csv', mode='a', newline='') as file:
+                        with open(f"{file_path}/evaluate_other.csv", mode='a', newline='') as file:
                             writer = csv.writer(file)
                             writer.writerow(row)  # Write row immediately
                         num_complete += 1
@@ -221,14 +219,13 @@ if __name__ == '__main__':
                             print(f'problem_pkg_{pkid} has finished')
                             for process in executor._processes.values():
                                 os.kill(process.pid, signal.SIGTERM)
-    print(f'Data has been written to {new_path}.csv')
+    print(f'Data has been written to {file_path}/evaluate_other.csv')
     print(time.perf_counter()- all_start_time)
 
 
 import pandas as pd
 
-file_path1 = '2_table_depth_all_scale.csv'
-df1 = pd.read_csv(file_path1, encoding='utf-8')
+df1 = pd.read_csv(f"{file_path}/evaluate_depth.csv", encoding='utf-8')
 
 grouped_df1 = df1.groupby(['pkid', 'layers', 'method'], as_index=False).agg({
     "culled_depth": 'mean',
@@ -239,8 +236,7 @@ pivot_df1 = grouped_df1.pivot(index=['pkid'], columns='method', values=["culled_
 method_order1 = ['PenaltySolver', 'CyclicSolver', 'HeaSolver', 'ChocoSolver']
 pivot_df1 = pivot_df1.reindex(columns=pd.MultiIndex.from_product([["culled_depth"], method_order1]))
 
-file_path2 = '2_table_evaluate_all_scale.csv'
-df2 = pd.read_csv(file_path2)
+df2 = pd.read_csv(f"{file_path}/evaluate_other.csv")
 df2 = df2.drop(columns=['pbid','ARG'])
 
 
