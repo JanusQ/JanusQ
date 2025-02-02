@@ -11,7 +11,7 @@ Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved.
 import numpy as np
 from janusq.analysis.vectorization import RandomwalkModel
 
-from janusq.data_objects.backend import Backend
+from janusq.objects.backend import Backend
 from janusq.tools.saver import dump, load
 from qiskit_aer.noise import NoiseModel, depolarizing_error, thermal_relaxation_error
 

@@ -16,7 +16,7 @@ from jax import numpy as jnp
 from jax import vmap
 from sklearn.model_selection import train_test_split
 
-from janusq.data_objects.circuit import Circuit
+from janusq.objects.circuit import Circuit
 from janusq.tools.optimizer import OptimizingHistory
 from janusq.tools.ray_func import batch, wait, map
 from janusq.tools.saver import dump, load

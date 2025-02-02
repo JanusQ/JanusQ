@@ -6,11 +6,11 @@ from copy import deepcopy
 
 import numpy as np
 from qiskit.circuit import Instruction
-from janusq.data_objects.circuit import Circuit, Gate
+from janusq.objects.circuit import Circuit, Gate
 
 from janusq.tools.saver import dump, load
 
-from janusq.data_objects.backend import Backend
+from janusq.objects.backend import Backend
 from janusq.tools.ray_func import map
 
 # TODO: path的结构替换成别的样子
@@ -188,7 +188,7 @@ class RandomwalkModel():
         self.dataset = None
 
         if backend is None:
-            from janusq.data_objects.backend import FullyConnectedBackend
+            from janusq.objects.backend import FullyConnectedBackend
             backend = FullyConnectedBackend(n_qubits  = 3)
 
         self.backend = backend
@@ -244,7 +244,7 @@ class RandomwalkModel():
         return {numpy.array}: return all gate vector if return_value is true
         '''
         if circuits is None:
-            from janusq.data_objects.random_circuit import random_circuits
+            from janusq.objects.random_circuit import random_circuits
             circuits = random_circuits(self.backend, n_circuits=300, n_gate_list=[30, 50, 100], two_qubit_prob_list=[.4], reverse=True)
 
         logging.info(f'start random walk for {len(circuits)} circuits')
