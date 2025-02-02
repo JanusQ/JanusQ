@@ -88,6 +88,7 @@ def solve_by_minisat(cnf_file, save=False, result_dir=".", verb=1, cpu_lim=0, me
         with open(f'{result_dir}/cnf_file_result.txt', mode='w') as f:
             json.dump(res, f)
     return res
+
 def solve_by_janusct(cnf_file, save=False, result_dir=".",verb=True, cpu_lim=0, mem_lim=0, strictp=False, use_realQC=False):
     '''
     description: using janusct method to solve sat domain problem.

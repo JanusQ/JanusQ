@@ -18,3 +18,7 @@ hyqsat/CMakeCache.txt
 hyqsat/install_manifest.txt
 hyqsat/lib*
 hyqsat/minisat_*
+janusq/TODO.md
+janusq/screenlog.0
+janusq/improve.svg
+janusq/all_path_errors.xlsx
