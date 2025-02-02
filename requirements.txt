@@ -24,3 +24,8 @@ dwave-system
 python-sat
 dwave-neal
 sympy
+pandas
+ray
+torchvision
+opencv-python
+gurobipy
