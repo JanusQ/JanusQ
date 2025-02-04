@@ -2,7 +2,7 @@ from .provider import Provider, CORE_BASIS_GATES, EXTENDED_BASIS_GATES
 from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
-from qiskit_ibm_runtime import SamplerV2 as Sampler
+from qiskit_ibm_runtime import Sampler
 from typing import Dict
 
 options = {"simulator": {"seed_simulator": 77}}

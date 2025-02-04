@@ -21,6 +21,7 @@ jax
 jaxlib
 jupyter
 matplotlib
+mqt.ddsim
 openai
 opencv-python
 opencv-python-headless
