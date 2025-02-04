@@ -1,6 +1,6 @@
 import sys
 sys.path.append('../..')
-from janusq.data_objects.circuit import Circuit
+from janusq.objects.circuit import Circuit
 import json
 import requests
 import numpy as np

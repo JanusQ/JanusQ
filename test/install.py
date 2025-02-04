@@ -1,4 +1,4 @@
-from janusq.data_objects.circuit import Circuit
+from janusq.objects.circuit import Circuit
 from janusq.cloud_interface import submit, get_result
 qc = Circuit([], n_qubits = 3)
 qc.h(0, 0)

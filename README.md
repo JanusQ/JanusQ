@@ -57,11 +57,11 @@ pip install -r requirements.txt
 Set up for HyQSAT
 
 ```bash
-cd ./hyqsat
+cd ./janusq/hyqsat/core_source
 cmake .
 make install
-cp libm* ../janusq/hyqsat
-cp minisat_core ../janusq/hyqsat
+cp libm* ../
+cp minisat_core ../
 ```  
 
 ## Structure of JanusQ
