@@ -2,9 +2,13 @@
 
 ## Installation
 
-You can install the virtual environment in two version, The CPU version is for simulation quantum circuit with CPU and the GPU version simulate quantum circuit by GPU.
+You can install the virtual environment in three versions:
 
-### CPU version
+- **CPU version**: Simulates quantum circuits using the CPU.
+- **GPU version**: Simulates quantum circuits using the GPU (requires CUDA 12 support).
+- **macOS version**: For users running macOS.
+
+### CPU version (Ubuntu)
 1. Install the envirnoment by conda
 ```bash
 conda env create -f environment_cpu.yml
@@ -23,7 +27,7 @@ pip install .
 ```
 
 
-### GPU version （need the support of CUDA12）
+### GPU version （Ubuntu, need the support of CUDA12）
 1. Install the envirnoment by conda
 ```bash
 conda env create -f environment_gpu.yml
@@ -42,7 +46,23 @@ conda remove -n choco_gpu --all
 pip install .
 ```
 
-
+### macOS version
+1. Install the environment using conda:
+```bash
+conda env create -f environment_osx.yml
+```
+2. Activate the installed virtual environment:
+```bash
+conda activate chocoq_osx
+```
+If the installation is interrupted or fails, you need to delete the environment and reinstall: 
+```bash
+conda remove -n chocoq_osx --all
+```
+3. install chocoq
+```bash
+pip install .
+```
 
 ## Test for installation
 Run corresponding test files according to the installation version:
