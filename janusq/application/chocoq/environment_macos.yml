@@ -1,4 +1,4 @@
-name: chocoq_osx
+name: chocoq
 channels:
   - defaults
   - https://repo.anaconda.com/pkgs/main
