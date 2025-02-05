@@ -2,7 +2,7 @@ from .provider import Provider
 from qiskit import QuantumCircuit
 from qiskit_ibm_runtime.fake_provider import FakeKyiv, FakeTorino, FakeBrisbane
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
-from qiskit_ibm_runtime import Sampler
+from qiskit_ibm_runtime import SamplerV2 as Sampler
 
 
 class FakeKyivProvider(Provider):

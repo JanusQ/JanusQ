@@ -57,12 +57,28 @@ pip install -r requirements.txt
 Set up for HyQSAT
 
 ```bash
-cd ./janusq/hyqsat/core_source
+cd ./janusq/application/hyqsat/solver
 cmake .
 make install
-cp libm* ../
-cp minisat_core ../
 ```  
+
+Set up for Choco-Q (CPU)
+
+```bash
+  cd ./janusq/application/chocoq
+  conda env create -f environment_cpu.yml
+  conda activate chocoq_cpu
+  pip install .
+```
+
+Set up for Choco-Q (GPU)
+
+```bash
+  cd ./janusq/application/chocoq
+  conda env create -f environment_gpu.yml
+  conda activate chocoq_qpu
+  pip install .
+```
 
 ## Structure of JanusQ
 

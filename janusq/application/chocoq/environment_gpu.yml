@@ -1,4 +1,4 @@
-name: choco_gpu
+name: chocoq_gpu
 channels:
   - defaults
 dependencies:
