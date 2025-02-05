@@ -11,11 +11,11 @@ conda env create -f environment_cpu.yml
 ```
 2. activate the installed virtual environment.
 ```bash
-conda activate choco_cpu
+conda activate chocoq_cpu
 ```
 If the installation is interrupted or fails, you need to delete the environment and reinstall: 
 ```bash
-conda remove -n choco_cpu --all
+conda remove -n chocoq_cpu --all
 ```
 3. install chocoq
 ```bash
