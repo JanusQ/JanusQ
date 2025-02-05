@@ -62,21 +62,32 @@ cmake .
 make install
 ```  
 
-Set up for Choco-Q (CPU)
+Set up for Choco-Q
+
+- For Linux with CPU
 
 ```bash
   cd ./janusq/application/chocoq
-  conda env create -f environment_cpu.yml
+  conda env create -f environment_linux_cpu.yml
   conda activate chocoq_cpu
   pip install .
 ```
 
-Set up for Choco-Q (GPU)
+- For Linux with GPU
 
 ```bash
   cd ./janusq/application/chocoq
-  conda env create -f environment_gpu.yml
+  conda env create -f environment_linux_gpu.yml
   conda activate chocoq_qpu
+  pip install .
+```
+
+- For MasOS
+
+```bash
+  cd ./janusq/application/chocoq
+  conda env create -f environment_macos.yml
+  conda activate chocoq
   pip install .
 ```
 

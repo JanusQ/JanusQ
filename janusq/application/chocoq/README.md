@@ -11,7 +11,7 @@ You can install the virtual environment in three versions:
 ### CPU version (Ubuntu)
 1. Install the envirnoment by conda
 ```bash
-conda env create -f environment_cpu.yml
+conda env create -f environment_linux_cpu.yml
 ```
 2. activate the installed virtual environment.
 ```bash
@@ -30,7 +30,7 @@ pip install .
 ### GPU version （Ubuntu, need the support of CUDA12）
 1. Install the envirnoment by conda
 ```bash
-conda env create -f environment_gpu.yml
+conda env create -f environment_linux_gpu.yml
 ```
 2. activate the installed virtual environment.
 ```bash
@@ -49,15 +49,15 @@ pip install .
 ### macOS version
 1. Install the environment using conda:
 ```bash
-conda env create -f environment_osx.yml
+conda env create -f environment_macos.yml
 ```
 2. Activate the installed virtual environment:
 ```bash
-conda activate chocoq_osx
+conda activate chocoq
 ```
 If the installation is interrupted or fails, you need to delete the environment and reinstall: 
 ```bash
-conda remove -n chocoq_osx --all
+conda remove -n chocoq --all
 ```
 3. install chocoq
 ```bash
@@ -89,7 +89,5 @@ If the installation fails, you may consider:
 
 ## Reproduce the experiments by Notebooks
 1. [implementations/0_test.ipynb](implementations/0_test.ipynb) - Custom optimization problem and solve it.
-
-
 
 2. [implementations/1_table.ipynb](implementations/1_table.ipynb) - Table 1 in the paper.
