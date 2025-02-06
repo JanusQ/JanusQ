@@ -31,7 +31,7 @@ class TravelingSalesmanProblem(LcboModel):
     def get_feasible_solution(self):
         """ 根据约束寻找到一个可行解 """
         import numpy as np
-        fsb_lst1 = np.zeros(len(self.variables))
+        fsb_lst1 = np.zeros(len(self.variables), dtype=int)
         for i in range(self.num_cities):
             # fsb_lst[i*self.num_cities+(i+1)%self.num_cities] = 1
             fsb_lst1[((i+1)%self.num_cities)*self.num_cities+i] = 1

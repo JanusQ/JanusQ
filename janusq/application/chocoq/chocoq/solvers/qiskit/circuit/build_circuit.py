@@ -48,6 +48,7 @@ class QiskitCircuit(ABC, Generic[T]):
     def analyzer(self) -> Metrics:
         if self._analyzer is None:
             self._analyzer = Metrics(self.inference_circuit, self.circuit_option.provider.backend)
+                
         return self._analyzer
     
     def analyze(self, metrics_list):
@@ -58,8 +59,11 @@ class QiskitCircuit(ABC, Generic[T]):
                 result.append(self.get_num_params())
             else:
                 # 使用getattr来根据字符串'feedback'获取属性
-                feedback_value = getattr(self.analyzer, metric)
-                result.append(feedback_value)
+                try:
+                    feedback_value = getattr(self.analyzer, metric)
+                    result.append(feedback_value)
+                except:
+                    result.append(None)
 
 
         return result

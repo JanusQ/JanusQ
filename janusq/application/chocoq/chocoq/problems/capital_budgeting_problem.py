@@ -18,7 +18,7 @@ class CapitalBudgetingProblem(LcboModel):
     def get_feasible_solution(self):
         """ 根据约束寻找到一个可行解 """
         import numpy as np
-        fsb_lst = np.zeros(len(self.variables))
+        fsb_lst = np.zeros(len(self.variables), dtype=int)
         self.fill_feasible_solution(fsb_lst)
         return fsb_lst
 

@@ -20,7 +20,7 @@ class GraphColoringProblem(LcboModel):
     def get_feasible_solution(self):
         """ 根据约束寻找到一个可行解 """
         import numpy as np
-        fsb_lst = np.zeros(len(self.variables))
+        fsb_lst = np.zeros(len(self.variables), dtype=int)
 
         for i in range(self.num_graphs):
             fsb_lst[self.var_idx(self.x[i, i])] = 1

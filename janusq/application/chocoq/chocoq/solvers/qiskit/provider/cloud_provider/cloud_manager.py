@@ -4,7 +4,7 @@ from qiskit_ibm_runtime.fake_provider import FakeKyiv, FakeTorino, FakeBrisbane
 import time
 import sys
 import random
-from multiprocessing import Process, Queue, current_process, Manager
+from multiprocessing import Manager
 
 class CloudManager:
     def __init__(self, job_dic, results, one_job_lens, sleep_interval=5,use_free=True, token_idx = 0) -> None:

@@ -26,7 +26,7 @@ class CobylaOptimizer(Optimizer):
         def callback(params):
             nonlocal iteration_count
             iteration_count += 1
-
+            # print(f"iteration {iteration_count}, result: {cost_func(params)}")
             if iteration_count % 10 == 0:
                 iprint(f"iteration {iteration_count}, result: {cost_func(params)}")
 
