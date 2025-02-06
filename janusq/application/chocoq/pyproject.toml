@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["chocoq"]
+
+[tool.poetry]
+description = ""
+authors = ["jiang7f <jiang7ff@163.com>"]
+dependencies = { python = "^3.10" }
+package_data = { "chocoq.solvers.cloud_execute" = ["IBM.key"] }
+
+[project]
+name = "chocoq"
+version = "1.0.0"

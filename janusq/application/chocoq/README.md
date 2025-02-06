@@ -23,7 +23,7 @@ conda remove -n chocoq_cpu --all
 ```
 3. install chocoq
 ```bash
-pip install .
+pip install -e .
 ```
 
 
@@ -43,7 +43,7 @@ conda remove -n choco_gpu --all
 ```
 3. install chocoq
 ```bash
-pip install .
+pip install -e .
 ```
 
 ### macOS version
@@ -61,7 +61,7 @@ conda remove -n chocoq --all
 ```
 3. install chocoq
 ```bash
-pip install .
+pip install -e .
 ```
 
 ## Test for installation
@@ -81,7 +81,7 @@ If you see "Environment configuration is successful!" it means the installation 
 If the installation fails, you may consider:
 
 1. Ensure that the correct conda environment is activated in the terminal.
-2. After switching environments, execute `pip install .` under `Choco-Q/` to install the chocoq package.
+2. After switching environments, execute `pip install -e .` under `Choco-Q/` to install the chocoq package.
 3. Make sure the Python execution environment is set to the corresponding conda environment. you may disable the user site by 
 ```bash
  export PYTHONNOUSERSITE=1
