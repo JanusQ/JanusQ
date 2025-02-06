@@ -1,4 +1,3 @@
-# nohup python3 2_table_all_scale.py > 2_table_all_scale.output 2>&1 &
 import os
 import time
 import csv
@@ -7,6 +6,11 @@ import random
 import itertools
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor, TimeoutError
+
+import sys
+sys.path.append('../../..')
+import logging
+logging.basicConfig(level=logging.WARN)
 
 from janusq.application.chocoq.chocoq.problems.facility_location_problem import generate_flp
 from janusq.application.chocoq.chocoq.problems.graph_coloring_problem import generate_gcp
@@ -110,9 +114,7 @@ if __name__ == '__main__':
                     for process in executor._processes.values():
                         os.kill(process.pid, signal.SIGTERM)
 
-file_path = '2_table_depth_all_scale.csv'
-
-df = pd.read_csv(file_path)
+df = pd.read_csv(f"{file_path}/evaluate_depth.csv")
 
 grouped_df = df.groupby(['pkid', 'layers', 'method'], as_index=False).agg({
     "culled_depth": 'mean',
@@ -126,7 +128,7 @@ pivot_df = pivot_df.reindex(columns=pd.MultiIndex.from_product([values, method_o
 
 print(pivot_df)
 
-new_path = '2_table_evaluate_all_scale'
+new_path = f"{file_path}/evaluate_depth.csv"
 
 problems_pkg = list(
     itertools.chain(
