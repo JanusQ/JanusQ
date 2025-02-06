@@ -2,16 +2,16 @@ import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit import Parameter
 
-from chocoq.solvers.abstract_solver import Solver
-from chocoq.solvers.optimizers import Optimizer
-from chocoq.solvers.options import CircuitOption, OptimizerOption, ModelOption
-from chocoq.solvers.options.circuit_option import ChCircuitOption
-from chocoq.model import LinearConstrainedBinaryOptimization as LcboModel
+from ...solvers.abstract_solver import Solver
+from ...solvers.optimizers import Optimizer
+from ...solvers.options import CircuitOption, OptimizerOption, ModelOption
+from ...solvers.options.circuit_option import ChCircuitOption
+from ...model import LinearConstrainedBinaryOptimization as LcboModel
 
 from .circuit import QiskitCircuit
 from .provider import Provider
 from .circuit.circuit_components import obj_compnt, commute_compnt
-from chocoq.utils.gadget import pray_for_buddha, iprint
+from ...utils.gadget import pray_for_buddha, iprint
 
 class ChocoCircuit(QiskitCircuit[ChCircuitOption]):
     def __init__(self, circuit_option: ChCircuitOption, model_option: ModelOption):

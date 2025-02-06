@@ -1,6 +1,6 @@
-from chocoq.model import LinearConstrainedBinaryOptimization as LcboModel, fast_mul
+from ..model import LinearConstrainedBinaryOptimization as LcboModel, fast_mul
 from typing import Iterable, List, Tuple
-from chocoq.utils import iprint
+from ..utils import iprint
 
 class GraphColoringProblem(LcboModel):
     def __init__(self, num_graphs: int, pairs_adjacent: List[Tuple[int, int]], cost_color: List[int]) -> None:

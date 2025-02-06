@@ -1,10 +1,10 @@
 import numpy as np
 from tqdm import tqdm
 
-from chocoq.utils import iprint
-from chocoq.utils.gadget import get_main_file_info, create_directory_if_not_exists
+from ...utils import iprint
+from ...utils.gadget import get_main_file_info, create_directory_if_not_exists
 
-from chocoq.solvers.options.optimizer_option import AdamOptimizerOption as OptimizerOption
+from ...solvers.options.optimizer_option import AdamOptimizerOption as OptimizerOption
 from .abstract_optimizer import Optimizer
 
 

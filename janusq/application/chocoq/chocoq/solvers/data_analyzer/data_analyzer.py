@@ -1,7 +1,7 @@
 import numpy as np
 from typing import List
 
-from chocoq.utils import iprint
+from ...utils import iprint
 
 class DataAnalyzer():
     def __init__(self, *, collapse_state_lst: List, probs_lst: List, obj_func, best_cost, lin_constr_mtx):

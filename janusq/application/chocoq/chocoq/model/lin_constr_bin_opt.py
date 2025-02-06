@@ -1,12 +1,12 @@
 import numpy as np
 from typing import Dict, Tuple, Set, List, Union
 
-from chocoq.model.model import Variable, Expression, Constraint, Model
-from chocoq.utils import set_print_form
-from chocoq.utils import iprint
-from chocoq.utils.errors import QuickFeedbackException
-from chocoq.utils.linear_system import find_basic_solution
-from chocoq.solvers.options import CircuitOption, OptimizerOption, ModelOption
+from .model import Variable, Expression, Constraint, Model
+from ..utils import set_print_form
+from ..utils import iprint
+from ..utils.errors import QuickFeedbackException
+from ..utils.linear_system import find_basic_solution
+from ..solvers.options import CircuitOption, OptimizerOption, ModelOption
 
 class LinearConstrainedBinaryOptimization(Model):
     def __init__(self):

@@ -4,7 +4,7 @@ from qiskit import QuantumCircuit
 from typing import Dict
 from .hdi_decompose import driver_component
 from qiskit import transpile
-from chocoq.utils.linear_system import get_circ_unitary
+from ....utils.linear_system import get_circ_unitary
 from ..provider import Provider
 
 def obj_compnt(qc: QuantumCircuit, param, obj_dct: Dict):
