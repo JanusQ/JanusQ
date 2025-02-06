@@ -69,8 +69,6 @@ Set up for Choco-Q
 ```bash
   cd ./janusq/application/chocoq
   conda env create -f environment_linux_cpu.yml
-  conda activate chocoq_cpu
-  pip install .
 ```
 
 - For Linux with GPU
@@ -78,8 +76,6 @@ Set up for Choco-Q
 ```bash
   cd ./janusq/application/chocoq
   conda env create -f environment_linux_gpu.yml
-  conda activate chocoq_qpu
-  pip install .
 ```
 
 - For MasOS
@@ -87,8 +83,6 @@ Set up for Choco-Q
 ```bash
   cd ./janusq/application/chocoq
   conda env create -f environment_macos.yml
-  conda activate chocoq
-  pip install .
 ```
 
 ## Structure of JanusQ
