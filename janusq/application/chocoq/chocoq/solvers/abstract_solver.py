@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 
-from chocoq.solvers.optimizers import Optimizer
-from chocoq.utils import iprint
-from chocoq.model import LinearConstrainedBinaryOptimization as LcboModel
+from ..solvers.optimizers import Optimizer
+from ..utils import iprint
+from ..model import LinearConstrainedBinaryOptimization as LcboModel
 
 from .options import CircuitOption
 from .options.model_option import ModelOption

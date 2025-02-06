@@ -3,7 +3,7 @@ from time import perf_counter
 from scipy.linalg import expm
 import numpy as np
 import pennylane as qml
-from chocoq.utils.gadget import iprint
+from ....utils.gadget import iprint
 def apply_convert(list_qubits, bit_string):
     num_qubits = len(bit_string)
     for i in range(0, num_qubits - 1):

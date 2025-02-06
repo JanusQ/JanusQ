@@ -1,4 +1,4 @@
-from chocoq.model import LinearConstrainedBinaryOptimization as LcboModel
+from ..model import LinearConstrainedBinaryOptimization as LcboModel
 from typing import Iterable
 import numpy as np
 

@@ -1,4 +1,4 @@
-from chocoq.model import LinearConstrainedBinaryOptimization as LcboModel
+from ..model import LinearConstrainedBinaryOptimization as LcboModel
 from typing import Iterable, List, Tuple
 class SetCoverProblem(LcboModel):
     def __init__(self, num_sets: int, num_elements, list_covering: List[List]) -> None:
