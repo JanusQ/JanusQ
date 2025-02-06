@@ -9,10 +9,10 @@ from chocoq.solvers.options.circuit_option import ChCircuitOption
 from chocoq.model import LinearConstrainedBinaryOptimization as LcboModel
 from chocoq.utils.gadget import iprint
 
-from .circuit import QiskitCircuit
-from .provider import Provider
-from .circuit.circuit_components import obj_compnt, search_evolution_space
-from .circuit.hdi_decompose import driver_component
+from ..circuit import QiskitCircuit
+from ..provider import Provider
+from ..circuit.circuit_components import obj_compnt, search_evolution_space
+from ..circuit.hdi_decompose import driver_component
 
 
 class ChocoCircuitSearch(QiskitCircuit[ChCircuitOption]):

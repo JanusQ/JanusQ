@@ -49,7 +49,7 @@ class AdamOptimizer(Optimizer):
                 backward = cost_function(shifted_params)
                 gradients[i] = (forward - backward) / (2 * shift)
 
-            print(gradients)
+            # print(gradients)
             return gradients
 
         eps = 1e-8

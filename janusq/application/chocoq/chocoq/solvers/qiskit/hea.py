@@ -15,7 +15,7 @@ from .circuit.circuit_components import obj_compnt, commute_compnt
 class HeaCircuit(QiskitCircuit[CircuitOption]):
     def __init__(self, circuit_option: CircuitOption, model_option: ModelOption):
         super().__init__(circuit_option, model_option)
-        self.inference_circuit = self.search_circuit()
+        self.inference_circuit = self.create_circuit()
 
     def get_num_params(self):
         return self.circuit_option.num_layers * self.model_option.num_qubits * 3
@@ -26,7 +26,7 @@ class HeaCircuit(QiskitCircuit[CircuitOption]):
         collapse_state, probs = self.process_counts(counts)
         return collapse_state, probs
 
-    def search_circuit(self) -> QuantumCircuit:
+    def create_circuit(self) -> QuantumCircuit:
         num_layers = self.circuit_option.num_layers
         num_qubits = self.model_option.num_qubits
 
