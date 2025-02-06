@@ -2,13 +2,13 @@ import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit import Parameter
 
-from chocoq.solvers.abstract_solver import Solver
-from chocoq.solvers.optimizers import Optimizer
-from chocoq.solvers.options import CircuitOption, OptimizerOption, ModelOption
-from chocoq.solvers.options.circuit_option import ChCircuitOption
-from chocoq.model import LinearConstrainedBinaryOptimization as LcboModel
-from chocoq.utils.linear_system import to_row_echelon_form, greedy_simplification_of_transition_Hamiltonian
-from chocoq.utils.gadget import iprint
+from ....solvers.abstract_solver import Solver
+from ....solvers.optimizers import Optimizer
+from ....solvers.options import CircuitOption, OptimizerOption, ModelOption
+from ....solvers.options.circuit_option import ChCircuitOption
+from ....model import LinearConstrainedBinaryOptimization as LcboModel
+from ....utils.linear_system import to_row_echelon_form, greedy_simplification_of_transition_Hamiltonian
+from ....utils.gadget import iprint
 from ..circuit import QiskitCircuit
 from ..provider import Provider
 from ..circuit.circuit_components import obj_compnt, search_evolution_space_low_cost
@@ -146,7 +146,7 @@ class QtoSearchSolver(Solver):
         num_layers = len(self.model_option.Hd_bitstr_list)
 
         # need to refix
-        from chocoq.solvers.qiskit import DdsimProvider
+        from ....solvers.qiskit import DdsimProvider
 
         self.circuit_option = ChCircuitOption(
             provider=DdsimProvider(),

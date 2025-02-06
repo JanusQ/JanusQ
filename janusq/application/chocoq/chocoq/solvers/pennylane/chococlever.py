@@ -2,14 +2,14 @@ import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit import Parameter
 
-from chocoq.solvers.abstract_solver import Solver
-from chocoq.solvers.optimizers import Optimizer
-from chocoq.solvers.options import CircuitOption, OptimizerOption, ModelOption
-from chocoq.solvers.options.circuit_option import ChCircuitOption
-from chocoq.model import LinearConstrainedBinaryOptimization as LcboModel
+from ...solvers.abstract_solver import Solver
+from ...solvers.optimizers import Optimizer
+from ...solvers.options import CircuitOption, OptimizerOption, ModelOption
+from ...solvers.options.circuit_option import ChCircuitOption
+from ...model import LinearConstrainedBinaryOptimization as LcboModel
 
 import pennylane as qml
-from chocoq.utils.gadget import iprint
+from ...utils.gadget import iprint
 from .circuit.pennylane_decompose import driver_component as driver_component_pennylane
 from .circuit.build_circuit import PennylaneCircuit
 class ChocoCircuit(PennylaneCircuit[ChCircuitOption]):

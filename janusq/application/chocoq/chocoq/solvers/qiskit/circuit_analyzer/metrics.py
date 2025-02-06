@@ -1,5 +1,5 @@
 from math import prod
-from chocoq.utils import iprint
+from ....utils import iprint
 from qiskit.circuit import QuantumCircuit
 from qiskit.converters import dag_to_circuit, circuit_to_dag
 from qiskit.dagcircuit import DAGOpNode

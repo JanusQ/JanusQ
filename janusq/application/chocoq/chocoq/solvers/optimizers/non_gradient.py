@@ -3,7 +3,7 @@ from scipy.optimize import minimize
 # import csv
 # import os
 
-from chocoq.utils import iprint #, read_last_row, get_main_file_info, create_directory_if_not_exists
+from ...utils import iprint #, read_last_row, get_main_file_info, create_directory_if_not_exists
 from .abstract_optimizer import Optimizer
 from ..options.optimizer_option import CobylaOptimizerOption as OptimizerOption
 

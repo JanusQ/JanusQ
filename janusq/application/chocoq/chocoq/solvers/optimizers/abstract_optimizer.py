@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 from typing import TypeVar, Generic
 
-from chocoq.solvers.options import OptimizerOption
+from ...solvers.options import OptimizerOption
 
 
 # np.random.seed(0x7f)

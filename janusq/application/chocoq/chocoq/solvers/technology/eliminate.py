@@ -1,8 +1,8 @@
-from chocoq.model import LinearConstrainedBinaryOptimization as LcboModel
-from chocoq.solvers.abstract_solver import Solver
-from chocoq.solvers.optimizers import Optimizer
-from chocoq.solvers.qiskit.provider import Provider
-from chocoq.solvers.options import ModelOption
+from ...model import LinearConstrainedBinaryOptimization as LcboModel
+from ...solvers.abstract_solver import Solver
+from ...solvers.optimizers import Optimizer
+from ...solvers.qiskit.provider import Provider
+from ...solvers.options import ModelOption
 import numpy as np
 import gurobipy as gp
 from typing import Type, Dict, List, Iterable
@@ -113,9 +113,9 @@ class Eliminate_variables():
             elimi_obj_dct = process_obj_dct(self.prb_model.obj_dct, frozen_idx_list, frozen_state_list)
             num_qubits = len(self.prb_model.variables) - len(frozen_idx_list)
             obj_dir = self.prb_model.obj_dir
-            from chocoq.utils.linear_system import to_row_echelon_form
+            from ...utils.linear_system import to_row_echelon_form
 
-            from chocoq.utils.linear_system import find_basic_solution
+            from ...utils.linear_system import find_basic_solution
             elimi_Hd_bitstr_list = find_basic_solution(elimi_linear_constraints[:,:-1]) if len(elimi_linear_constraints) > 0 else []
             
             def elimi_objective_func_map(origin_func):

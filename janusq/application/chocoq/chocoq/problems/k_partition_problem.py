@@ -1,4 +1,4 @@
-from chocoq.model import LinearConstrainedBinaryOptimization as LcboModel
+from ..model import LinearConstrainedBinaryOptimization as LcboModel
 from typing import Iterable, List, Tuple
 class KPartitionProblem(LcboModel):
     def __init__(self, num_points: int, block_allot: List[int], pairs_connected: List[Tuple[Tuple[int, int], int]]) -> None:
