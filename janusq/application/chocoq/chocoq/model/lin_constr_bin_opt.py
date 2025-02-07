@@ -36,7 +36,7 @@ class LinearConstrainedBinaryOptimization(Model):
         repr = super().__repr__()
         return (
             f"{repr}"
-            f"penalty_lambda:\n{self.penalty_lambda}\n\n"
+            f"- penalty_lambda: {self.penalty_lambda}\n"
         )
 
     

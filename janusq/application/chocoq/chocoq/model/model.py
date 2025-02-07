@@ -334,10 +334,10 @@ class Model:
         var_str = "   ".join([repr(var)+f" (type: {var.vtype})" for var in self.variables])
         constr_str = "\n".join([repr(constr) for constr in self.constraints])
         return (
-            f"m:\n"
-            f"variables:\n{var_str}\n\n"
-            f"obj:\n{self.obj_sense} {self.objective}\n\n"
-            f"s.t.:\n{constr_str}\n\n"
+            f"Model:\n"
+            f"- variables: {var_str}\n"
+            f"- obj: {self.obj_sense} {self.objective}\n"
+            f"- s.t.:\n{constr_str}\n"
             )
 
 if __name__ == '__main__':
