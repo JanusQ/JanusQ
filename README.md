@@ -1,4 +1,4 @@
-# JanusQ: A Software Framework for Analyzing, Optimizing, Verifying, Implementing, and Calibrating Quantum Circuit
+# JanusQ: A Software Framework for Analyzing, Optimizing, Verifying, and Implementing Quantum Circuit
 
 This is an open-source framework for quantum computing developed by Zhejiang University. 
 
@@ -51,6 +51,7 @@ Pull the source code from github and install the dependencies
 ```bash
 git clone git@github.com:JanusQ/JanusQ.git
 cd JanusQ
+conda create -n janusq python=3.10
 pip install -r requirements.txt
 ```  
 
@@ -130,7 +131,7 @@ Debin Xiang, Qifan Jiang, Liqiang Lu, Siwei Tan, and Jianwei Yin (Zhejiang Unive
     Run following command
 
     ```bash
-    chmod +x janusq/hyqsat/minisat_core
+    chmod +x janusq/application/hyqsat/solver/minisat_core
     ```
 
 2. Error "Library not loaded: @rpath/libpython3.10.dylib" 
@@ -138,5 +139,5 @@ Debin Xiang, Qifan Jiang, Liqiang Lu, Siwei Tan, and Jianwei Yin (Zhejiang Unive
     Run following command
 
     ```bash
-    install_name_tool -add_rpath /path/to/python3.10/lib janusq/hyqsat/minisat_core
+    install_name_tool -add_rpath /path/to/python3.10/lib janusq/application/hyqsat/solver/minisat_core
     ```

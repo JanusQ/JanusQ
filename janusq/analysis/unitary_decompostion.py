@@ -43,11 +43,11 @@ import logging
 
 from tqdm import tqdm
 
-from janusq.analysis.vectorization import RandomwalkModel, extract_device
-from janusq.objects.backend import Backend, FullyConnectedBackend
-from janusq.objects.circuit import Circuit, Layer, circuit_to_qiskit, qiskit_to_circuit
-from janusq.tools.optimizer import OptimizingHistory
-from janusq.tools.ray_func import wait, map
+from .vectorization import RandomwalkModel, extract_device
+from ..objects.backend import Backend, FullyConnectedBackend
+from ..objects.circuit import Circuit, Layer, circuit_to_qiskit, qiskit_to_circuit
+from ..tools.optimizer import OptimizingHistory
+from ..tools.ray_func import wait, map
 import inspect
 import os
 

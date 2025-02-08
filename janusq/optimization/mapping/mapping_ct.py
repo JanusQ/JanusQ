@@ -10,10 +10,10 @@ Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved.
 '''
 import logging
 import numpy as np
-from janusq.analysis.fidelity_prediction import FidelityModel
-from janusq.objects.backend import Backend
+from ...analysis.fidelity_prediction import FidelityModel
+from ...objects.backend import Backend
 
-from janusq.objects.circuit import Circuit, qiskit_to_circuit
+from ...objects.circuit import Circuit, qiskit_to_circuit
 from qiskit import transpile
 
 class Mapper():

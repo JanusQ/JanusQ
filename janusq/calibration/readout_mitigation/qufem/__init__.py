@@ -1,2 +1,2 @@
-from janusq.calibration.readout_mitigation.qufem.benchmarking import IterativeSamplingProtocol, EnumeratedProtocol
-from janusq.calibration.readout_mitigation.qufem.mitigation import Mitigator
+from .benchmarking import IterativeSamplingProtocol, EnumeratedProtocol
+from .mitigation import Mitigator

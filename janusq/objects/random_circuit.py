@@ -15,8 +15,8 @@ from cmath import pi
 
 from qiskit import QuantumCircuit
 
-from janusq.objects.backend import Backend
-from janusq.objects.circuit import Circuit, SeperatableCircuit, qiskit_to_circuit
+from .backend import Backend
+from .circuit import Circuit, SeperatableCircuit, qiskit_to_circuit
 import math
 
 

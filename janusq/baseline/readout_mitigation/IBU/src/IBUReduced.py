@@ -1,9 +1,9 @@
 import logging
-from janusq.baseline.readout_mitigation.IBU.src.IBUBase import IBUBase
+from .IBUBase import IBUBase
 from collections import namedtuple
 from typing import NamedTuple, Union
-from janusq.baseline.readout_mitigation.IBU.utils.data_utils import *
-from janusq.baseline.readout_mitigation.IBU.src.kron_matmul import *
+from ..utils.data_utils import *
+from .kron_matmul import *
 from functools import partial
 from tqdm import tqdm
 

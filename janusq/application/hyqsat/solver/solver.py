@@ -128,9 +128,9 @@ def solve_by_hyqsat(cnf_file, save=False, result_dir=".",verb=True, cpu_lim=0, m
     file_path = os.path.join(current_dir, cnf_file)
     if not os.path.exists(file_path):
         raise Exception("cnf file not exists.")
-    # print([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), file_path, result_dir, '1', str(cpu_lim),  str(mem_lim), str(strictp), "quantum", os.path.join(os.path.dirname(inspect.getfile(recongnize)), 'python/'), str(use_realQC)])
-    process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), file_path, result_dir, '1', str(cpu_lim),  str(mem_lim), str(strictp), "quantum", os.path.join(os.path.dirname(inspect.getfile(recongnize)), 'python/'), str(use_realQC)], stdout=subprocess.PIPE, text=True)
     res = {}
+    # print([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), file_path, result_dir, '1', str(cpu_lim),  str(mem_lim), str(strictp), "quantum", os.path.join(os.path.dirname(inspect.getfile(recongnize)), '../python/'), str(use_realQC)])
+    process = subprocess.Popen([os.path.join(os.path.dirname(inspect.getfile(recongnize)), './minisat_core'), file_path, result_dir, '1', str(cpu_lim),  str(mem_lim), str(strictp), "quantum", os.path.join(os.path.dirname(inspect.getfile(recongnize)), '../python/'), str(use_realQC)], stdout=subprocess.PIPE, text=True)
     while True:
         output = process.stdout.readline()
         if output == '' and process.poll() is not None:

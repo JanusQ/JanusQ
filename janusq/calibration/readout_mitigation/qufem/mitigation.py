@@ -4,7 +4,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-from janusq.tools.ray_func import map
+from ....tools.ray_func import map
 import networkx as nx
 import matplotlib.pyplot as plt
 import networkx.algorithms.approximation.maxcut as maxcut
@@ -12,7 +12,7 @@ from sklearn.naive_bayes import GaussianNB
 from pgmpy.factors.discrete import TabularCPD
 from pgmpy.models import BayesianNetwork
 from pgmpy.inference import VariableElimination
-from janusq.calibration.readout_mitigation.qufem.tools import all_bitstrings, npformat_to_statuscnt, statuscnt_to_npformat, to_int
+from .tools import all_bitstrings, npformat_to_statuscnt, statuscnt_to_npformat, to_int
 
 
 def downsample_statuscnt(statscnt: tuple[np.ndarray, np.ndarray], qubits: list) -> tuple[np.ndarray, np.ndarray]:

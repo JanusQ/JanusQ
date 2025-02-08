@@ -1,6 +1,6 @@
 import logging
-from janusq.baseline.readout_mitigation.IBU.utils.data_utils import *
-from janusq.baseline.readout_mitigation.IBU.src.IBUBase import IBUBase
+from ..utils.data_utils import *
+from .IBUBase import IBUBase
 from typing import Union, List, Tuple
 from functools import partial
 from jax import jit

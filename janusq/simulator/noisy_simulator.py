@@ -14,11 +14,11 @@ from numpy import pi
 from qiskit import Aer
 from qiskit import QuantumCircuit, execute
 from qiskit.quantum_info.analysis import hellinger_fidelity
-from janusq.analysis.vectorization import RandomwalkModel, extract_device
-from janusq.objects.circuit import Circuit, Gate, Layer, SeperatableCircuit
-from janusq.objects.random_circuit import random_1q_layer
+from ..analysis.vectorization import RandomwalkModel, extract_device
+from ..objects.circuit import Circuit, Gate, Layer, SeperatableCircuit
+from ..objects.random_circuit import random_1q_layer
 from qiskit_aer.noise import NoiseModel
-from janusq.simulator.readout_error_model import ReadoutErrorModel
+from .readout_error_model import ReadoutErrorModel
 from .gate_error_model import GateErrorModel
 import numpy as np
 

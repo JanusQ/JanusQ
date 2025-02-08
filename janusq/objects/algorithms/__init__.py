@@ -11,8 +11,8 @@ Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved.
 
 from qiskit import QuantumCircuit, transpile, QuantumRegister
 from qiskit.circuit import Qubit
-from janusq.objects.backend import Backend
-from janusq.objects.circuit import Circuit, qiskit_to_circuit
+from ..backend import Backend
+from ..circuit import Circuit, qiskit_to_circuit
 from . import hamiltonian_simulation, vqc, ising, qft, qknn, qsvm, grover,  ghz
 
 

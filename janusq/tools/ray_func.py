@@ -16,7 +16,7 @@ from concurrent.futures._base import Future
 
 import ray
 from sklearn.utils import shuffle
-from janusq.tools import pb
+from . import pb
 
 import multiprocessing
  
