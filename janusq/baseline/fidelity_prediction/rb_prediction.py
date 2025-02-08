@@ -15,9 +15,9 @@ import qiskit.ignis.verification.randomized_benchmarking as rb
 
 from qiskit import execute, transpile, Aer
 import ray
-from janusq.simulator.noisy_simulator import NoisySimulator
-from janusq.objects.circuit import  Circuit, qiskit_to_circuit
-from janusq.tools.ray_func import wait, map
+from ...simulator.noisy_simulator import NoisySimulator
+from ...objects.circuit import  Circuit, qiskit_to_circuit
+from ...tools.ray_func import wait, map
 
 class RBModel():
     
@@ -70,7 +70,7 @@ class RBModel():
         '''
         fidelity = 1
         for gate in circuit.gates:
-            from  janusq.analysis.vectorization import extract_device
+            from  ...analysis.vectorization import extract_device
             device = extract_device(gate)
             if isinstance(device,tuple):
                 fidelity = fidelity * couple_average_error_rb[device]

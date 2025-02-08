@@ -3,10 +3,10 @@ import logging
 import random
 import numpy as np
 from qiskit import QuantumCircuit
-from janusq.objects.backend import Backend
-from janusq.objects.circuit import Circuit
-from janusq.calibration.readout_mitigation.qufem.tools import all_bitstrings, decimal, statuscnt_to_npformat
-from janusq.tools.ray_func import map
+from ....objects.backend import Backend
+from ....objects.circuit import Circuit
+from .tools import all_bitstrings, decimal, statuscnt_to_npformat
+from ....tools.ray_func import map
 
 def gen_benchmarking_circuit(real: np.ndarray) -> Circuit:              
     measured_qubits = [

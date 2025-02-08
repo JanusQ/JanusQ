@@ -1,6 +1,6 @@
-from janusq.objects.backend import Backend
+from ..objects.backend import Backend
 import numpy as np
-from janusq.tools.saver import load, dump
+from ..tools.saver import load, dump
 from qiskit_aer.noise import NoiseModel, ReadoutError
 
 class ReadoutErrorModel():

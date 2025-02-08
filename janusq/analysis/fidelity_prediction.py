@@ -16,10 +16,10 @@ from jax import numpy as jnp
 from jax import vmap
 from sklearn.model_selection import train_test_split
 
-from janusq.objects.circuit import Circuit
-from janusq.tools.optimizer import OptimizingHistory
-from janusq.tools.ray_func import batch, wait, map
-from janusq.tools.saver import dump, load
+from ..objects.circuit import Circuit
+from ..tools.optimizer import OptimizingHistory
+from ..tools.ray_func import batch, wait, map
+from ..tools.saver import dump, load
 
 from .vectorization import RandomwalkModel, extract_device
 from tqdm import tqdm

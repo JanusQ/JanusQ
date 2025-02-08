@@ -1,5 +1,5 @@
-from janusq.baseline.readout_mitigation.IBU.src.IBUFull import IBUFull
-from janusq.baseline.readout_mitigation.IBU.src.IBUReduced import IBUReduced
+from .IBUFull import IBUFull
+from .IBUReduced import IBUReduced
 import numpy as np
 from typing import List, Union
 

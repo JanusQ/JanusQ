@@ -11,9 +11,9 @@ Copyright (c) 2024 by name/jxhhhh� 2071379252@qq.com, All Rights Reserved.
 import copy
 import random
 import numpy as np
-from janusq.analysis.fidelity_prediction import FidelityModel
+from ...analysis.fidelity_prediction import FidelityModel
 
-from janusq.objects.circuit import Circuit
+from ...objects.circuit import Circuit
 import time
 
 

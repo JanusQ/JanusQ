@@ -11,7 +11,7 @@ import logging
 import ray
 from collections import defaultdict
 import numpy as np
-from janusq.tools.ray_func import  map
+from ....tools.ray_func import map
 
 def decimal(value, convert_type, base = 2):
     if convert_type == 'str':

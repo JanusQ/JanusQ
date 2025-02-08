@@ -70,16 +70,13 @@ class RenameUnpickler(pickle.Unpickler):
     def find_class(self, module, name):
 
         renamed_module = module
-        if module.startswith("data_objects"):# or module.startwith("analysis") or module.startwith("data_objects")
-            renamed_module = "janusq." + module
+        if module.startswith("data_objects"):
+            renamed_module = "janusq.objects" + module.split("data_objects")[1]
 
         return super(RenameUnpickler, self).find_class(renamed_module, name)
-
 
 def renamed_load(file_obj):
     return RenameUnpickler(file_obj).load()
 
-
 with open(os.path.join(dirname, "fidelity_dataset_18q.pkl"), "rb") as f:
     real_qc_18bit = renamed_load(f)
-

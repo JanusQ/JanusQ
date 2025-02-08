@@ -15,10 +15,10 @@ dwave-system
 dwave-neal
 bqskit
 cloudpickle
-chex
+chex==0.1.7
 gurobipy
-jax
-jaxlib
+jax==0.4.6
+jaxlib==0.4.6
 jupyter
 matplotlib
 openai
