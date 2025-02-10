@@ -52,6 +52,7 @@ Pull the source code from github and install the dependencies
 git clone git@github.com:JanusQ/JanusQ.git
 cd JanusQ
 conda create -n janusq python=3.10
+conda activate janusq
 pip install -r requirements.txt
 ```  
 
