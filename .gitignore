@@ -4,7 +4,6 @@
 docker_data
 build
 janusq.egg-info
-.vscode
-.virtual_documents
+Dockerfile
 janusq/TODO.md
 janusq/all_path_errors.xlsx
