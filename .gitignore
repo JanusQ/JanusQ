@@ -1,7 +1,7 @@
 *.pyc
 *.pkl
 */__pycache__
-docker_data
+setup.py
 build
 janusq.egg-info
 Dockerfile
