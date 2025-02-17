@@ -17,8 +17,8 @@ bqskit
 cloudpickle
 chex==0.1.7
 gurobipy
-jax==0.4.6
-jaxlib==0.4.6
+jax==0.4.14
+jaxlib==0.4.14
 jupyter
 matplotlib
 openai
