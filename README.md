@@ -13,16 +13,16 @@ JanusQ can be installed by docker, wheel, and soruce code. Docker is recommended
 Pull docker image
 
 ```bash
-docker pull janusq/janusq:latest
+docker pull janusq/janusq3:latest
 ```
 
 Run docker image
 
 ```bash
-docker run -itd -p 8888:22 -p 9999:23 --name tutorial janusq/janusq
+docker run -itd -p 8888:22 -p 9999:23 --name tutorial janusq/janusq3
 ```
 
-The docker can be accessed via
+The docker can be accessed via (password is "root"):
 
 ```bash
 ssh root@localhost -p 8888
@@ -38,7 +38,7 @@ The source code is in "/JanusQ/janusq" and examples can be directly run in "/Jan
 
 ### From wheel
 
-Download [janusq.whl](https://github.com/JanusQ/JanusQ/blob/main/dist/janusq-0.1.0-py3-none-any.whl) and install with `pip`
+Download [janusq.whl](https://github.com/JanusQ/JanusQ/blob/main/dist/janusq-0.3.0-py3-none-any.whl) and install with `pip`
 
 ```bash
 pip install janusq.whl
