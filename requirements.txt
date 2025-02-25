@@ -13,12 +13,12 @@ qiskit-ibm-experiment==0.3.5
 pennylane==0.34.0
 dwave-system==1.28.0
 dwave-neal==0.6.0
-bqskit==1.2.0
+bqskit
 chex==0.1.7
 cloudpickle==3.1.0
 gurobipy==12.0.1
-jax==0.4.14
-jaxlib==0.4.14
+jax==0.4.18
+jaxlib==0.4.18
 jupyter
 matplotlib
 openai
@@ -30,7 +30,7 @@ pgmpy
 python-sat
 ray==2.9.2
 scikit-learn==1.4.0
-scipy
+scipy==1.11.4
 seaborn
 sympy
 tensorflow
