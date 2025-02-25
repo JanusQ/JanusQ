@@ -30,7 +30,7 @@ pgmpy
 python-sat
 ray==2.9.2
 scikit-learn==1.4.0
-scipy
+scipy==1.11.4
 seaborn
 sympy
 tensorflow
